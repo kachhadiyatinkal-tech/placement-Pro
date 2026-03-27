@@ -6,13 +6,13 @@ import {
   fetchAllNotices,
   updateNotice,
 } from '../../features/management/managementSlice'
-import { fetchNoticesByRole } from '../../features/notices/noticesSlice'
 import { validateRequired } from '../../utils/validation'
 import NoticeDetailModal from '../../components/NoticeDetailModal'
 import { API_BASE_URL } from '../../services/axios'
 import { downloadPDF } from '../../utils/download'
-import { Download, Edit2, Eye, Plus, Shield, Trash2 } from 'lucide-react'
+import { Download, PenLine, Eye, Plus, Shield, Trash, Megaphone, Clock } from 'lucide-react'
 import Pagination from '../../components/common/Pagination'
+import IconButton from '../../components/common/IconButton'
 
 const inputClass = (err, isDark) =>
   `mt-1 w-full rounded-2xl border px-4 py-3 text-sm font-bold uppercase tracking-wide outline-none transition-all ${isDark
@@ -20,31 +20,8 @@ const inputClass = (err, isDark) =>
     : `bg-white focus:border-zinc-400 ${err ? 'border-red-500' : 'border-zinc-200'}`
   }`
 
-function getAttachmentUrls(n) {
-  if (!n) return []
-  if (Array.isArray(n.attachmentUrls)) return n.attachmentUrls.filter(Boolean)
-  if (Array.isArray(n.attachments)) {
-    return n.attachments
-      .map((a) => {
-        if (!a) return null
-        if (typeof a === 'string') return a
-        return a.url || a.path || a.fileUrl || null
-      })
-      .filter(Boolean)
-      .map((url) => (url.startsWith('http') || url.startsWith('data:') ? url : `${API_BASE_URL}${url}`))
-  }
-  if (typeof n.attachmentUrl === 'string') return [n.attachmentUrl.startsWith('http') || n.attachmentUrl.startsWith('data:') ? n.attachmentUrl : `${API_BASE_URL}${n.attachmentUrl}`]
-  if (typeof n.attachment === 'string') return [n.attachment.startsWith('http') || n.attachment.startsWith('data:') ? n.attachment : `${API_BASE_URL}${n.attachment}`]
-  return []
-}
-
-function isImageUrl(url) {
-  return (url?.startsWith('data:image/') || /\.(png|jpg|jpeg|gif|webp)$/i.test(url || ''))
-}
-
 export default function AdminNotices() {
   const dispatch = useDispatch()
-  const { notices: noticesForMe } = useSelector((s) => s.notices)
   const { notices: allNotices } = useSelector((s) => s.management)
   const user = useSelector((s) => s.auth.user)
   const mode = useSelector((s) => s.theme.mode)
@@ -66,7 +43,6 @@ export default function AdminNotices() {
   const paginatedNotices = (allNotices || []).slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   useEffect(() => {
-    dispatch(fetchNoticesByRole('management,management_admin'))
     dispatch(fetchAllNotices())
   }, [dispatch])
 
@@ -107,14 +83,13 @@ export default function AdminNotices() {
     setNoticeErrors({})
     setShowCompose(false)
     sendPromise.finally(() => {
-      dispatch(fetchNoticesByRole('management,management_admin'))
       dispatch(fetchAllNotices())
     })
   }
 
   function canEditNotice(n) {
     if (!n?.createdAt) return false
-    return Date.now() - new Date(n.createdAt).getTime() <= 5 * 60 * 1000
+    return Date.now() - new Date(n.createdAt).getTime() <= 30 * 60 * 1000 // Extended to 30 mins
   }
 
   async function handleUpdateNotice(e) {
@@ -135,22 +110,29 @@ export default function AdminNotices() {
     setEditingNotice(null)
     setUpdateNoticeErrors({})
     dispatch(fetchAllNotices())
-    dispatch(fetchNoticesByRole('management,management_admin'))
+  }
+
+  const getRecipientStyle = (role) => {
+    const map = {
+        student: isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-700 border-emerald-100',
+        tpo: isDark ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-indigo-50 text-indigo-700 border-indigo-100',
+        management: isDark ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 'bg-purple-50 text-purple-700 border-purple-100'
+    }
+    return map[role] || (isDark ? 'bg-zinc-800 text-zinc-400 border-zinc-700' : 'bg-zinc-100 text-zinc-600 border-zinc-200')
   }
 
   return (
-    <div className={`mx-auto max-w-7xl space-y-8 transition-colors duration-300 ${isDark ? 'text-zinc-100' : 'text-zinc-900'}`}>
+    <div className={`mx-auto max-w-7xl space-y-8 animate-fade-in`}>
 
       {/* Header Section */}
       <div className="flex flex-col gap-4 px-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className={`mb-2 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest border ${isDark ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-indigo-600/10 text-indigo-600 border-indigo-600/20'
-            }`}>
-            <Shield /> Communications
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-indigo-600/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-600 border border-indigo-600/20">
+            <Megaphone size={12} /> Communication Hub
           </div>
-          <h1 className="text-3xl font-black tracking-tight uppercase leading-none">Bulletin Board</h1>
-          <p className={`mt-2 text-sm font-bold uppercase tracking-widest ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-            Send notices to students, TPO, or management.
+          <h1 className="text-3xl font-black tracking-tight uppercase leading-none">Bulletin <span className="text-brand-500">Archive</span></h1>
+          <p className="mt-2 text-sm font-bold uppercase tracking-widest text-zinc-500">
+            Internal broadcasting and announcement logs.
           </p>
         </div>
 
@@ -159,15 +141,14 @@ export default function AdminNotices() {
             type="button"
             onClick={() =>
               downloadPDF(
-                `notices-${new Date().toISOString().slice(0, 10)}.pdf`,
+                `notices-archive-${new Date().toISOString().slice(0, 10)}.pdf`,
                 (allNotices || []).map((n) => ({ ...n })),
                 undefined,
-                { title: 'Notices export' },
+                { title: 'Notices communication log' },
               )
             }
-            className={`flex h-12 w-12 items-center justify-center rounded-2xl border transition-all active:scale-90 ${isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800' : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'
-              }`}
-            title="Download PDF"
+            className={`flex h-12 w-12 items-center justify-center rounded-2xl border transition-all ${isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800' : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 shadow-sm'}`}
+            title="Export Logs"
           >
             <Download size={20} />
           </button>
@@ -184,184 +165,79 @@ export default function AdminNotices() {
         </div>
       </div>
 
-      {/* Notices for You */}
-      <section className={`space-y-4 ${isDark ? 'text-zinc-100' : 'text-zinc-900'}`}>
-        <div className="px-2">
-          <h2 className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>Notices for you</h2>
+      {/* Notice Table Container */}
+      <div className={`overflow-hidden rounded-[2.5rem] border transition-all ${
+        isDark ? 'border-zinc-800 bg-zinc-900/40 shadow-2xl shadow-zinc-950/50' : 'border-zinc-100 bg-white shadow-2xl shadow-zinc-200/50'
+      }`}>
+        <div className="flex items-center justify-between border-b px-8 py-5 dark:border-zinc-800/50">
+           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Archive Strength: <span className="text-emerald-500">{allNotices?.length || 0} Broadcasts</span></p>
+           <div className="flex items-center gap-2">
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Live Server Connection</span>
+           </div>
         </div>
-        <div className="grid gap-6 md:grid-cols-2">
-          {(noticesForMe || []).map((n) => (
-            <div key={n._id} className={`group relative flex flex-col overflow-hidden rounded-[2.5rem] border p-8 transition-all ${isDark
-              ? 'border-zinc-800 bg-zinc-950/40 hover:border-indigo-500/30'
-              : 'border-zinc-100 bg-white hover:shadow-2xl hover:shadow-zinc-200/50'
-              }`}>
-              <div className="mb-4 flex items-center justify-between">
-                <span className={`rounded-lg px-2 py-1 text-[9px] font-black uppercase tracking-widest border ${isDark ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-indigo-600/10 text-indigo-600 border-indigo-600/20'
-                  }`}>
-                  To: {n.receiver_role}
-                </span>
-                <div className="flex gap-3">
-                  <button onClick={() => setSelectedNotice(n)} className="text-zinc-400 hover:text-indigo-500 transition-colors"><Eye size={16} /></button>
-                  {canEditNotice(n) && (
-                    <button
-                      onClick={() => {
-                        setUpdateNoticeErrors({})
-                        setEditingNotice({ ...n })
-                      }}
-                      className="text-zinc-400 hover:text-amber-500 transition-colors"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => dispatch(deleteNotice(n._id)).finally(() => dispatch(fetchNoticesByRole('management,management_admin')))}
-                    className="text-zinc-400 hover:text-red-500 transition-colors"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </div>
 
-              <h3 className={`text-lg font-black uppercase tracking-tight leading-tight ${isDark ? 'text-zinc-100' : 'text-zinc-900'}`}>{n.title || 'Untitled Notice'}</h3>
-              <p className={`mt-3 line-clamp-3 text-xs font-bold leading-relaxed uppercase tracking-wide ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                {n.message}
-              </p>
-
-              {getAttachmentUrls(n).length > 0 && (
-                <div className="mt-6 grid grid-cols-1 gap-2">
-                  {getAttachmentUrls(n).map((url, idx) => (
-                    <div key={idx} className={`overflow-hidden rounded-2xl border ${isDark ? 'border-zinc-800' : 'border-zinc-100'}`}>
-                      {isImageUrl(url) ? (
-                        <img src={url} alt="Attachment" className="h-32 w-full object-cover opacity-80 group-hover:opacity-100" />
-                      ) : (
-                        <div className={`flex items-center justify-between p-3 ${isDark ? 'bg-zinc-950' : 'bg-zinc-50'}`}>
-                          <span className="text-[10px] font-black uppercase text-zinc-500">Document Asset</span>
-                          <a href={url} target="_blank" rel="noreferrer" className="text-[10px] font-black uppercase text-indigo-500 hover:underline">Open</a>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-          {!noticesForMe?.length && <p className="px-2 text-xs font-black uppercase tracking-widest text-zinc-500">Inbox empty.</p>}
-        </div>
-      </section>
-
-      {/* Admin Archive Table */}
-      {/* <div className={`overflow-hidden rounded-[2.5rem] border transition-all ${isDark ? 'border-zinc-800 bg-zinc-100 backdrop-blur-md' : 'border-zinc-100 bg-zink-900 shadow-2xl shadow-zinc-200/50'
-        }`}>
-        <div className={`border-b px-8 py-5 ${isDark ? 'border-zinc-800/50' : 'border-zinc-100'}`}>
-          <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-zinc-200' : 'text-zinc-900'}`}>
-            Admin Archive: <span className="text-emerald-500">{allNotices?.length || 0} Records</span>
-          </p>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+        <div className="overflow-x-auto min-h-[400px]">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className={`border-b ${isDark ? 'border-zinc-800/50 bg-zinc-950/30' : 'border-zinc-50 bg-zinc-50/50'}`}>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Notice Title</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Recipient Group</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-right">Actions</th>
+              <tr className={`border-b ${isDark ? 'border-zinc-800 bg-zinc-950/30' : 'border-zinc-50 bg-zinc-50/50'}`}>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Notice Heading</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Timestamps</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-center">Audience</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-right">Operations</th>
               </tr>
             </thead>
-            <tbody className={`divide-y ${isDark ? 'divide-zinc-800/50' : 'divide-zinc-100'}`}>
+            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {paginatedNotices.map((n) => (
-                <tr key={n._id} className={`group transition-colors ${isDark ? 'hover:bg-indigo-400/[0.02]' : 'hover:bg-indigo-600/[0.02]'}`}>
-                  <td className="px-8 py-6">
-                    <p className={`text-sm font-black uppercase tracking-tight ${isDark ? 'text-zinc-200' : 'text-zinc-900'}`}>{n.title || 'No Title'}</p>
-                  </td>
-                  <td className="px-8 py-6">
-                    <span className={`inline-block rounded-lg border px-3 py-1 text-[9px] font-black uppercase tracking-widest ${isDark ? 'border-zinc-700 text-zinc-400' : 'border-zinc-100 text-zinc-500'
-                      }`}>
-                      {n.receiver_role || 'N/A'}
-                    </span>
-                  </td>
-                  <td className="px-8 py-6 text-right">
-                    <div className="flex justify-end gap-2">
-                      {canEditNotice(n) && (
-                        <button
-                          onClick={() => {
-                            setUpdateNoticeErrors({})
-                            setEditingNotice({ ...n })
-                          }}
-                          className={`rounded-xl border px-3 py-1 text-[10px] uppercase transition-all ${isDark ? 'border-zinc-800 text-zinc-400 hover:bg-zinc-800' : 'border-zinc-100 hover:bg-zinc-50'
-                            }`}
-                        >
-                          Edit
-                        </button>
-                      )}
-                      <button onClick={() => setSelectedNotice(n)} className={`rounded-xl border px-3 py-1 text-[10px] uppercase transition-all ${isDark ? 'border-zinc-700 bg-zinc-800 text-zinc-200 hover:bg-indigo-600 hover:border-indigo-600' : 'border-zinc-100 hover:bg-zinc-50'
-                        }`}>View</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div> */}
-      {/* Admin Archive Table */}
-      <div className={`overflow-hidden rounded-[2.5rem] border transition-all duration-300 ${isDark
-          ? 'border-zinc-800 bg-zinc-100 shadow-none'
-          : 'border-zinc-200 bg-zinc-50 shadow-2xl shadow-zinc-200/50'
-        }`}>
-        {/* Table Top Bar */}
-        <div className={`border-b px-8 py-5 ${isDark ? 'border-zinc-300/50' : 'border-zinc-200'}`}>
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-              Admin Archive: <span className="text-emerald-500">{allNotices?.length || 0} Records</span>
-            </p>
-            <div className="h-1.5 w-1.5 rounded-full animate-pulse bg-emerald-500" />
-          </div>
-        </div>
-
-        {/* Scrollable Container */}
-        <div className="max-h-[600px] overflow-y-auto overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left border-collapse">
-            <tbody className={`divide-y ${isDark ? 'divide-zinc-200' : 'divide-zinc-200'}`}>
-              {(allNotices || []).map((n) => (
-                <tr
-                  key={n._id}
-                  className="group transition-colors hover:bg-black/[0.02]"
-                >
+                <tr key={n._id} className="group transition-colors hover:bg-indigo-600/[0.02]">
                   <td className="px-8 py-6">
                     <div className="flex flex-col">
-                      <span className="text-sm font-black uppercase tracking-tight text-zinc-900">
-                        {n.title || 'Broadcast Record'}
-                      </span>
-                      <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5 group-hover:text-indigo-500 transition-colors">
-                        ID: {n._id.slice(-8)}
-                      </span>
+                        <span className={`text-sm font-black uppercase tracking-tight ${isDark ? 'text-zinc-100' : 'text-zinc-900'}`}>{n.title || 'Broadcast Record'}</span>
+                        <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-1">Ref ID: {n._id.slice(-8)}</span>
                     </div>
                   </td>
-
+                  <td className="px-8 py-6">
+                    <div className="flex items-center gap-2 text-zinc-400">
+                        <Clock size={12} className="opacity-40" />
+                        <span className="text-[10px] font-bold tracking-tight">
+                            {new Date(n.createdAt).toLocaleDateString()} at {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                    </div>
+                  </td>
                   <td className="px-8 py-6 text-center">
-                    <span className="inline-block rounded-lg px-4 py-1.5 text-[9px] font-black uppercase tracking-widest bg-zinc-400 text-white border border-zinc-500/50 shadow-sm">
-                      {n.receiver_role || 'N/A'}
+                    <span className={`inline-block px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border shadow-sm ${getRecipientStyle(n.receiver_role)}`}>
+                      {n.receiver_role || 'Broadcast'}
                     </span>
                   </td>
-
                   <td className="px-8 py-6 text-right">
-                    <div className="flex justify-end items-center gap-2">
-                      {canEditNotice(n) && (
-                        <button
-                          onClick={() => {
-                            setUpdateNoticeErrors({})
-                            setEditingNotice({ ...n })
-                          }}
-                          className="rounded-[1rem] border border-zinc-300 bg-white px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition-all hover:bg-zinc-50 active:scale-95 shadow-sm"
-                        >
-                          Edit
-                        </button>
-                      )}
-                      <button
-                        onClick={() => setSelectedNotice(n)}
-                        className="rounded-[1rem] border border-zinc-800 bg-zinc-800 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-zinc-700 active:scale-95 shadow-md shadow-zinc-800/20"
-                      >
-                        View
-                      </button>
+                    <div className="flex justify-end gap-1">
+                       <IconButton 
+                        icon={Eye} 
+                        onClick={() => setSelectedNotice(n)} 
+                        variant="zinc"
+                        size={16}
+                      />
+                       {canEditNotice(n) && (
+                        <IconButton 
+                            icon={PenLine} 
+                            onClick={() => {
+                                setUpdateNoticeErrors({})
+                                setEditingNotice({ ...n })
+                            }} 
+                            variant="indigo"
+                            size={16}
+                        />
+                       )}
+                       <IconButton 
+                        icon={Trash} 
+                        onClick={() => {
+                            if (window.confirm("Permanently remove this notice?")) {
+                                dispatch(deleteNotice(n._id)).finally(() => dispatch(fetchAllNotices()))
+                            }
+                        }} 
+                        variant="red"
+                        size={16}
+                      />
                     </div>
                   </td>
                 </tr>
@@ -369,9 +245,9 @@ export default function AdminNotices() {
             </tbody>
           </table>
         </div>
-      </div>
-      {!!allNotices?.length && (
-        <Pagination
+
+        {/* Pagination */}
+        <Pagination 
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage}
@@ -382,7 +258,7 @@ export default function AdminNotices() {
             setItemsPerPage(size)
           }}
         />
-      )}
+      </div>
 
       {/* Compose Modal */}
       {showCompose && (
@@ -410,7 +286,13 @@ export default function AdminNotices() {
               </div>
               <div className="space-y-2">
                 <label className="ml-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">Message Body *</label>
-                <textarea value={noticeForm.message} onChange={(e) => setNoticeForm({ ...noticeForm, message: e.target.value })} rows={4} className={inputClass(noticeErrors.message, isDark)} />
+                <textarea 
+                    value={noticeForm.message} 
+                    onChange={(e) => setNoticeForm({ ...noticeForm, message: e.target.value })} 
+                    rows={4} 
+                    className={`${inputClass(noticeErrors.message, isDark)} normal-case`} 
+                    placeholder="Enter detailed announcement content..."
+                />
                 {noticeErrors.message && <p className="mt-1 text-[10px] font-black uppercase text-red-500">{noticeErrors.message}</p>}
               </div>
               <div className="space-y-2">
@@ -454,7 +336,7 @@ export default function AdminNotices() {
                 value={editingNotice.message || ''}
                 onChange={(e) => setEditingNotice((s) => ({ ...s, message: e.target.value }))}
                 rows={4}
-                className={inputClass(!!updateNoticeErrors.message, isDark)}
+                className={`${inputClass(!!updateNoticeErrors.message, isDark)} normal-case`}
                 placeholder="Message *"
               />
               {updateNoticeErrors.message && <p className="text-[10px] font-black uppercase text-red-500">{updateNoticeErrors.message}</p>}
@@ -479,4 +361,4 @@ export default function AdminNotices() {
       <NoticeDetailModal notice={selectedNotice} onClose={() => setSelectedNotice(null)} />
     </div>
   )
-}
+}

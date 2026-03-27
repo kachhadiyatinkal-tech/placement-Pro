@@ -1,14 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Download, Edit3, Eye, Plus, UserPlus, Shield, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { Download, PenLine, Eye, Plus, Trash, Shield, X } from 'lucide-react'
 import {
   addTpo,
   addManagement,
   addStudent,
+  deleteTpo,
+  deleteManagement,
+  deleteStudent,
 } from '../../features/management/managementSlice'
 import { validateEmail, validatePassword, validateRequired, validatePhoneRequired } from '../../utils/validation'
 import { adminAPI } from '../../services/api/adminAPI'
 import { downloadPDF } from '../../utils/download'
+import Pagination from '../../components/common/Pagination'
+import IconButton from '../../components/common/IconButton'
 
 const inputClass = (err, isDark) =>
   `w-full rounded-2xl border px-5 py-3 text-sm font-bold outline-none transition-all focus:ring-4 focus:ring-indigo-500/10 ${
@@ -27,10 +32,10 @@ export default function AdminAddUser() {
   const [addFormErrors, setAddFormErrors] = useState({})
   const [editFormErrors, setEditFormErrors] = useState({})
   const [users, setUsers] = useState([])
-  const [page, setPage] = useState(1)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
   const [selectedUser, setSelectedUser] = useState(null)
   const [editingUser, setEditingUser] = useState(null)
-  const pageSize = 10
 
   async function loadUsers() {
     try {
@@ -80,11 +85,11 @@ export default function AdminAddUser() {
   }
 
   const pagedUsers = useMemo(() => {
-    const start = (page - 1) * pageSize
-    return users.slice(start, start + pageSize)
-  }, [users, page])
+    const start = (currentPage - 1) * itemsPerPage
+    return users.slice(start, start + itemsPerPage)
+  }, [users, currentPage, itemsPerPage])
 
-  const totalPages = Math.max(1, Math.ceil(users.length / pageSize))
+  const totalPages = Math.max(1, Math.ceil(users.length / itemsPerPage))
 
   async function handleUpdateUser(e) {
     e.preventDefault()
@@ -111,6 +116,15 @@ export default function AdminAddUser() {
     await loadUsers()
   }
 
+  const handleDeleteUser = async (u) => {
+    if (!window.confirm(`Permanently remove ${u.first_name} (${u.listType})?`)) return
+    const payload = { email: u.email }
+    if (u.listType === 'tpo') await dispatch(deleteTpo(payload))
+    else if (u.listType === 'management') await dispatch(deleteManagement(payload))
+    else await dispatch(deleteStudent(payload))
+    await loadUsers()
+  }
+
   const getTypeStyle = (type) => {
     const styles = {
       management: isDark ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 'bg-purple-50 text-purple-700 border-purple-100',
@@ -128,7 +142,7 @@ export default function AdminAddUser() {
           <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-indigo-600/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-600 border border-indigo-600/20">
             <Shield /> Admin Console
           </div>
-          <h1 className="text-3xl font-black tracking-tight uppercase leading-none">User Directory</h1>
+          <h1 className="text-3xl font-black tracking-tight uppercase leading-none">User <span className="text-brand-500">Directory</span></h1>
           <p className="mt-2 text-sm font-bold uppercase tracking-widest text-zinc-500">
             Provision and manage cross-platform accounts.
           </p>
@@ -190,24 +204,28 @@ export default function AdminAddUser() {
                     </span>
                   </td>
                   <td className="px-8 py-6 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button 
-                        type="button" 
-                        onClick={() => setSelectedUser(u)}
-                        className={`p-2 rounded-xl border transition-all ${isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-indigo-400' : 'border-zinc-100 bg-zinc-50 text-zinc-600 hover:text-indigo-600'}`}
-                      >
-                        <Eye size={16} />
-                      </button>
-                      <button 
-                        type="button" 
+                    <div className="flex justify-end gap-1 px-2">
+                       <IconButton 
+                        icon={Eye} 
+                        onClick={() => setSelectedUser(u)} 
+                        variant="zinc"
+                        size={16}
+                      />
+                       <IconButton 
+                        icon={PenLine} 
                         onClick={() => {
                           setEditFormErrors({})
                           setEditingUser({ ...u })
-                        }}
-                        className={`p-2 rounded-xl border transition-all ${isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-amber-400' : 'border-zinc-100 bg-zinc-50 text-zinc-600 hover:text-amber-600'}`}
-                      >
-                        <Edit3 size={16} />
-                      </button>
+                        }} 
+                        variant="indigo"
+                        size={16}
+                      />
+                       <IconButton 
+                        icon={Trash} 
+                        onClick={() => handleDeleteUser(u)} 
+                        variant="red"
+                        size={16}
+                      />
                     </div>
                   </td>
                 </tr>
@@ -216,26 +234,19 @@ export default function AdminAddUser() {
           </table>
         </div>
 
+
         {/* Pagination */}
-        <div className="flex items-center justify-between px-8 py-6 bg-zinc-50/50 dark:bg-zinc-950/20">
-          <button 
-            type="button" 
-            disabled={page <= 1} 
-            onClick={() => setPage((p) => Math.max(1, p - 1))} 
-            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 disabled:opacity-30 hover:text-indigo-600 transition-colors"
-          >
-            <ChevronLeft /> Prev
-          </button>
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Page {page} <span className="mx-2 opacity-30">/</span> {totalPages}</span>
-          <button 
-            type="button" 
-            disabled={page >= totalPages} 
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))} 
-            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 disabled:opacity-30 hover:text-indigo-600 transition-colors"
-          >
-            Next <ChevronRight />
-          </button>
-        </div>
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={users.length}
+          itemsPerPage={itemsPerPage}
+          onItemsPerPageChange={(size) => {
+            setCurrentPage(1)
+            setItemsPerPage(size)
+          }}
+        />
       </div>
 
       {/* Add User Modal */}
@@ -401,4 +412,4 @@ export default function AdminAddUser() {
       )}
     </div>
   )
-}
+}

@@ -3,7 +3,7 @@ const Application = require('../models/Application');
 const User = require('../models/user.model');
 const Job = require('../models/job.model');
 
-const MANAGER_ROLES = ['tpo', 'company'];
+const MANAGER_ROLES = ['tpo', 'company', 'admin', 'management', 'superuser'];
 const UPDATABLE_STATUSES = ['under_review', 'shortlisted', 'interview', 'selected', 'rejected'];
 
 const allowedTransitions = {
@@ -158,6 +158,31 @@ const getJobApplicants = async (req, res) => {
     return res.status(200).json({ data: applicants });
   } catch (error) {
     console.log('applicationController.getJobApplicants => ', error);
+    return res.status(500).json({ msg: 'Internal Server Error!' });
+  }
+};
+
+const getAllApplications = async (req, res) => {
+  try {
+    if (!canManageApplications(req?.user?.role)) {
+      return res.status(403).json({ msg: 'Access denied.' });
+    }
+
+    const applicants = await Application.find()
+      .populate({
+        path: 'studentId',
+        select: 'first_name last_name email profile studentProfile.resume',
+      })
+      .populate({
+        path: 'jobId',
+        select: 'jobTitle company',
+        populate: { path: 'company', select: 'companyName' }
+      })
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({ data: applicants });
+  } catch (error) {
+    console.log('applicationController.getAllApplications => ', error);
     return res.status(500).json({ msg: 'Internal Server Error!' });
   }
 };
@@ -320,8 +345,10 @@ module.exports = {
   applyToJob,
   getStudentApplications,
   getJobApplicants,
+  getAllApplications,
   updateApplicationStatus,
   scheduleInterview,
   uploadOfferLetterEndpoint,
   respondToOffer,
 };
+

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { Edit2, Plus, Trash2, Briefcase } from 'lucide-react'
+import { PenLine, Plus, Trash, Briefcase, Clock, DollarSign, Activity, FileText } from 'lucide-react'
 import IconButton from '../../components/common/IconButton'
 import Pagination from '../../components/common/Pagination'
 import { deleteJob, fetchJobs, postJob } from '../../features/jobs/jobSlice'
@@ -147,29 +147,35 @@ export default function AdminJobs() {
 
   return (
     <div className="space-y-8 pb-16">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      {/* Header Section */}
+      <div className="flex flex-col gap-4 px-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="mb-2 inline-flex rounded-xl border border-indigo-500/25 bg-indigo-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
-            Administration
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-emerald-600/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 border border-emerald-600/20">
+            <Activity size={12} /> Pipeline Control
           </div>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Jobs</h1>
-          <p className={`mt-2 max-w-xl text-sm ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>
-            Post, edit, or remove listings. Uses the same pipeline as TPO postings.
+          <h1 className="text-3xl font-black tracking-tight uppercase leading-none">Job <span className="text-brand-500">Archives</span></h1>
+          <p className="mt-2 text-sm font-bold uppercase tracking-widest text-zinc-500">
+            Lifecycle management for campus recruitment opportunities.
           </p>
         </div>
+        
         <button
           type="button"
           onClick={openCreate}
-          className={`inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:gap-3 active:scale-[0.98] ${
-            isDark ? 'bg-indigo-500 hover:bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700'
-          }`}
+          className="flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-6 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-indigo-600/20 transition-all hover:bg-indigo-700 active:scale-95"
         >
-          <Plus className="text-lg" />
-          Post job
+          <Plus size={18} />
+          Post New Role
         </button>
       </div>
 
-      <div className={`overflow-hidden rounded-[1.75rem] border ${card}`}>
+      {/* Main Table Card */}
+      <div className={`overflow-hidden rounded-[2.5rem] border transition-all ${
+        isDark ? 'border-zinc-800 bg-zinc-900/40 shadow-2xl shadow-zinc-950/50' : 'border-zinc-100 bg-white shadow-2xl shadow-zinc-200/50'
+      }`}>
+        <div className="border-b border-zinc-100 px-8 py-5 dark:border-zinc-800/50">
+           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Database Status: <span className="text-emerald-500">{jobs.length} Active Records</span></p>
+        </div>
         {loading ? (
           <div className="flex justify-center py-24">
             <div className="h-10 w-10 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
@@ -183,67 +189,60 @@ export default function AdminJobs() {
             </button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px] text-left text-sm">
+          <div className="overflow-x-auto min-h-[400px]">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className={`border-b text-[11px] font-bold uppercase tracking-wider ${isDark ? 'border-zinc-800 text-zinc-500' : 'border-zinc-200 text-zinc-500'}`}>
-                  <th className="px-6 py-4">Title</th>
-                  <th className="px-6 py-4">Company</th>
-                  <th className="px-6 py-4">Salary</th>
-                  <th className="px-6 py-4">Deadline</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                <tr className={`border-b ${isDark ? 'border-zinc-800 bg-zinc-950/30' : 'border-zinc-50 bg-zinc-50/50'}`}>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Role Identity</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Principal Entity</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-center">Valuation</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-center">Deadline</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-center">Status</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
                 {paginatedJobs.map((job) => {
-                  const closed =
-                    job.applicationClosed === true || isApplicationDeadlinePassed(job.applicationDeadline)
+                  const closed = job.applicationClosed === true || isApplicationDeadlinePassed(job.applicationDeadline)
                   return (
-                  <tr
-                    key={job._id}
-                    className={`border-b last:border-0 ${isDark ? 'border-zinc-800 hover:bg-zinc-800/40' : 'border-zinc-100 hover:bg-zinc-50'}`}
-                  >
-                    <td className="px-6 py-4 font-semibold">{job.jobTitle}</td>
-                    <td className={`px-6 py-4 ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>{job.company?.companyName || '—'}</td>
-                    <td className="px-6 py-4">{job.salary != null ? job.salary : '—'}</td>
-                    <td className={`px-6 py-4 ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>{formatDate(job.applicationDeadline)}</td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-block rounded-lg border px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                    <tr key={job._id} className="group transition-colors hover:bg-indigo-600/[0.02]">
+                      <td className="px-8 py-6">
+                        <div className="flex flex-col">
+                          <span className={`text-sm font-black uppercase tracking-tight ${isDark ? 'text-zinc-100' : 'text-zinc-900'}`}>{job.jobTitle}</span>
+                          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-1">Ref ID: {job._id.slice(-8)}</span>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <p className="text-xs font-bold text-zinc-500">{job.company?.companyName || '—'}</p>
+                      </td>
+                      <td className="px-8 py-6 text-center">
+                        <div className="flex items-center justify-center gap-1.5 text-zinc-400">
+                          <DollarSign size={12} className="opacity-40" />
+                          <span className="text-[10px] font-black tracking-tight">{job.salary != null ? job.salary.toLocaleString() : 'Negotiable'}</span>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6 text-center">
+                        <div className="flex items-center justify-center gap-1.5 text-zinc-400">
+                          <Clock size={12} className="opacity-40" />
+                          <span className="text-[10px] font-bold tracking-tight">{formatDate(job.applicationDeadline)}</span>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6 text-center">
+                        <span className={`inline-block px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
                           closed
-                            ? isDark
-                              ? 'border-zinc-600 bg-zinc-800 text-zinc-400'
-                              : 'border-zinc-200 bg-zinc-100 text-zinc-500'
-                            : isDark
-                              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-                              : 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                        }`}
-                      >
-                        {closed ? 'Closed' : 'Open'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-end gap-2">
-                        <IconButton 
-                          icon={Edit2} 
-                          onClick={() => openEdit(job)} 
-                          title="Edit Job"
-                          variant="indigo"
-                        />
-                        <IconButton 
-                          icon={Trash2} 
-                          onClick={() => {
-                            setDeleteTarget(job)
-                            setDeleteText('')
-                            setDeleteErr('')
-                          }} 
-                          title="Delete Job"
-                          variant="red"
-                        />
-                      </div>
-                    </td>
-                  </tr>
+                            ? (isDark ? 'border-zinc-700 text-zinc-400 bg-zinc-800' : 'border-zinc-200 text-zinc-500 bg-zinc-50')
+                            : (isDark ? 'border-emerald-400/20 text-emerald-400 bg-emerald-400/10' : 'border-emerald-100 text-emerald-700 bg-emerald-50')
+                        }`}>
+                          {closed ? 'Expired' : 'Live'}
+                        </span>
+                      </td>
+                      <td className="px-8 py-6 text-right">
+                        <div className="flex justify-end gap-1 px-2">
+                          <IconButton icon={PenLine} onClick={() => openEdit(job)} variant="indigo" size={16} />
+                          <IconButton icon={Trash} onClick={() => { setDeleteTarget(job); setDeleteText(''); setDeleteErr(''); }} variant="red" size={16} />
+                        </div>
+                      </td>
+                    </tr>
                   )
                 })}
               </tbody>

@@ -147,10 +147,12 @@ export default function Register() {
       <div className="mx-auto w-full max-w-md">
         <div className="mb-6 flex items-center justify-between px-1">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white shadow-lg shadow-indigo-600/25">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-sm font-black text-white shadow-lg shadow-brand-500/25">
               P
             </div>
-            <span className="text-sm font-bold tracking-tight">PlacementPro</span>
+            <span className="text-sm font-black tracking-tight uppercase">
+              Placement<span className="text-brand-500">Pro</span>
+            </span>
           </div>
           <ThemeToggle />
         </div>

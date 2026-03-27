@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Download, FileText, Inbox, Search, Layers } from 'lucide-react'
+import { Download, FileText, Inbox, Search, Layers, Briefcase } from 'lucide-react'
 import Loader from '../../components/Loader'
 import { downloadPDF } from '../../utils/download'
-import { fetchApplicants, fetchJobs } from '../../features/jobs/jobSlice'
+import { fetchAllApplicants, fetchApplicants, fetchJobs } from '../../features/jobs/jobSlice'
 import Pagination from '../../components/common/Pagination'
 
 // Helper functions for data normalization
@@ -18,7 +18,8 @@ function jobTitle(job) {
 }
 
 function resumeHref(student) {
-  return student?.resumeUrl || student?.resume || student?.resumePath || undefined
+  const s = student?.studentId || student
+  return s?.resumeUrl || s?.resume || s?.resumePath || s?.studentProfile?.resume?.filepath || undefined
 }
 
 export default function AdminApplications() {
@@ -36,7 +37,7 @@ export default function AdminApplications() {
   }, [dispatch])
 
   const applicants = useMemo(
-    () => (jobId ? applicantsByJobId[jobId] || [] : []),
+    () => (jobId ? applicantsByJobId[jobId] || [] : applicantsByJobId['all'] || []),
     [applicantsByJobId, jobId],
   )
   const totalPages = Math.max(1, Math.ceil(applicants.length / itemsPerPage))
@@ -46,25 +47,36 @@ export default function AdminApplications() {
   }, [applicants, currentPage, itemsPerPage])
 
   useEffect(() => {
-    if (!jobId) return
     setCurrentPage(1)
-    dispatch(fetchApplicants(jobId))
+    if (jobId) {
+      dispatch(fetchApplicants(jobId))
+    } else {
+      dispatch(fetchAllApplicants())
+    }
   }, [dispatch, jobId])
 
   const selectedJob = useMemo(() => jobs.find((j) => (j?._id || j?.id) === jobId), [jobs, jobId])
-  const isApplicantsLoading = status === 'loading' && !!jobId
+  const isApplicantsLoading = status === 'loading'
 
   const downloadApplicantsPDF = () => {
-    const rows = applicants.map((a) => ({
-      name: a?.name || a?.studentName || '—',
-      email: a?.email || '—',
-      skills: a?.skills || a?.studentSkills || '—',
-      status: a?.status || 'Applied',
-      resume: resumeHref(a) || '—',
-    }))
-    const file = `applicants-${jobTitle(selectedJob).replaceAll(' ', '-').toLowerCase()}.pdf`
-    downloadPDF(file, rows, ['name', 'email', 'skills', 'status', 'resume'], {
-      title: `Applicants — ${companyName(selectedJob)} / ${jobTitle(selectedJob)}`,
+    const rows = applicants.map((a) => {
+      const s = a?.studentId || a
+      return {
+        name: `${s?.first_name || ''} ${s?.last_name || ''}`.trim() || s?.name || s?.studentName || '—',
+        email: s?.email || '—',
+        position: a?.jobId ? `${jobTitle(a.jobId)} @ ${companyName(a.jobId)}` : (selectedJob ? jobTitle(selectedJob) : '—'),
+        status: a?.status || 'Applied',
+        resume: resumeHref(a) || '—',
+      }
+    })
+    const file = jobId 
+      ? `applicants-${jobTitle(selectedJob).replaceAll(' ', '-').toLowerCase()}.pdf`
+      : 'all-applicants.pdf'
+    
+    downloadPDF(file, rows, ['name', 'email', 'position', 'status', 'resume'], {
+      title: jobId 
+        ? `Applicants — ${companyName(selectedJob)} / ${jobTitle(selectedJob)}`
+        : 'All Active Job Applications',
     })
   }
 
@@ -76,7 +88,7 @@ export default function AdminApplications() {
           <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-indigo-600/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-600 border border-indigo-600/20">
             <Layers /> Submission Portal
           </div>
-          <h1 className="text-3xl font-black tracking-tight uppercase leading-none">Application Manager</h1>
+          <h1 className="text-3xl font-black tracking-tight uppercase leading-none">Application <span className="text-brand-500">Manager</span></h1>
           <p className="mt-2 text-sm font-bold uppercase tracking-widest text-zinc-500">
             Audit candidate profiles and export recruitment data.
           </p>
@@ -99,7 +111,7 @@ export default function AdminApplications() {
                   : 'border-zinc-100 bg-zinc-50 focus:border-indigo-600'
                   }`}
               >
-                <option value="">Select a listing to audit...</option>
+                <option value="">All Applications (Global View)</option>
                 {(jobs || []).map((j) => {
                   const id = j?._id || j?.id
                   return (
@@ -115,7 +127,7 @@ export default function AdminApplications() {
           <button
             type="button"
             onClick={downloadApplicantsPDF}
-            disabled={!jobId || isApplicantsLoading || !applicants?.length}
+            disabled={isApplicantsLoading || !applicants?.length}
             className="flex items-center justify-center gap-3 rounded-2xl bg-zinc-900 px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl transition-all hover:bg-zinc-800 disabled:opacity-20 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 active:scale-95"
           >
             <Download size={18} />
@@ -124,7 +136,7 @@ export default function AdminApplications() {
         </div>
       </div>
 
-      {status === 'loading' && !jobs?.length ? <Loader label="Syncing recruitment database..." /> : null}
+      {status === 'loading' && !jobs?.length && !applicants.length ? <Loader label="Syncing recruitment database..." /> : null}
 
       {/* Table Section */}
       <div className={`overflow-hidden rounded-[2.5rem] border transition-all ${isDark ? 'border-zinc-800 bg-zinc-900/40' : 'border-zinc-100 bg-white'
@@ -134,79 +146,83 @@ export default function AdminApplications() {
             <thead>
               <tr className={`border-b ${isDark ? 'border-zinc-800 bg-zinc-950/30' : 'border-zinc-50 bg-zinc-50/50'}`}>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Candidate</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Expertise</th>
+                {!jobId && <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Position</th>}
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Expertise / Skills</th>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-center">Portfolio</th>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {isApplicantsLoading ? (
+              {isApplicantsLoading && !paginatedApplicants.length ? (
                 <tr>
-                  <td colSpan={4} className="px-8 py-24 text-center">
+                  <td colSpan={6} className="px-8 py-24 text-center">
                     <Loader label="Decrypting applicant data..." />
                   </td>
                 </tr>
               ) : null}
 
-              {!isApplicantsLoading && paginatedApplicants.map((a, idx) => (
-                <tr key={a?._id || a?.id || idx} className="group transition-colors hover:bg-indigo-600/[0.02]">
-                  <td className="px-8 py-6">
-                    <div className="min-w-0">
-                      <p className="text-sm font-black uppercase tracking-tight">{a?.name || a?.studentName || 'Anonymous'}</p>
-                      <p className="mt-1 text-[10px] font-bold text-zinc-500">{a?.email || 'No email provided'}</p>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <p className="text-xs font-bold text-zinc-600 dark:text-zinc-400 max-w-xs truncate">
-                      {a?.skills || a?.studentSkills || 'General Application'}
-                    </p>
-                  </td>
-                  <td className="px-8 py-6 text-center">
-                    {resumeHref(a) ? (
-                      <a
-                        href={resumeHref(a)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${isDark ? 'bg-zinc-800 text-zinc-300 hover:bg-indigo-500/20 hover:text-indigo-400' : 'bg-zinc-100 text-zinc-600 hover:bg-indigo-50 hover:text-indigo-600'
-                          }`}
-                      >
-                        <FileText size={14} /> Resume
-                      </a>
-                    ) : (
-                      <span className="text-[10px] font-black uppercase text-zinc-400 opacity-40">N/A</span>
+              {paginatedApplicants.map((a, idx) => {
+                const s = a?.studentId || a
+                return (
+                  <tr key={a?._id || a?.id || idx} className="group transition-colors hover:bg-indigo-600/[0.02]">
+                    <td className="px-8 py-6">
+                      <div className="min-w-0">
+                        <p className="text-sm font-black uppercase tracking-tight">
+                          {`${s?.first_name || ''} ${s?.last_name || ''}`.trim() || s?.name || s?.studentName || 'Anonymous'}
+                        </p>
+                        <p className="mt-1 text-[10px] font-bold text-zinc-500">{s?.email || 'No email provided'}</p>
+                      </div>
+                    </td>
+                    {!jobId && (
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-2">
+                          <Briefcase size={14} className="text-zinc-400" />
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-tight">{jobTitle(a?.jobId)}</p>
+                            <p className="text-[9px] font-bold text-zinc-400">{companyName(a?.jobId)}</p>
+                          </div>
+                        </div>
+                      </td>
                     )}
-                  </td>
-                  <td className="px-8 py-6">
-                    <span className={`inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${isDark ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-indigo-50 border-indigo-100 text-indigo-600'
-                      }`}>
-                      {a?.status || 'Applied'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                    <td className="px-8 py-6">
+                      <p className="text-xs font-bold text-zinc-600 dark:text-zinc-400 max-w-xs truncate">
+                        {s?.skills || s?.studentSkills || s?.studentProfile?.department || 'General Application'}
+                      </p>
+                    </td>
+                    <td className="px-8 py-6 text-center">
+                      {resumeHref(a) ? (
+                        <a
+                          href={resumeHref(a)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${isDark ? 'bg-zinc-800 text-zinc-300 hover:bg-indigo-500/20 hover:text-indigo-400' : 'bg-zinc-100 text-zinc-600 hover:bg-indigo-50 hover:text-indigo-600'
+                            }`}
+                        >
+                          <FileText size={14} /> Resume
+                        </a>
+                      ) : (
+                        <span className="text-[10px] font-black uppercase text-zinc-400 opacity-40">N/A</span>
+                      )}
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className={`inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${isDark ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-indigo-50 border-indigo-100 text-indigo-600'
+                        }`}>
+                        {a?.status || 'Applied'}
+                      </span>
+                    </td>
+                  </tr>
+                )
+              })}
 
-              {!isApplicantsLoading && jobId && !(applicants || []).length ? (
+              {!isApplicantsLoading && !(applicants || []).length ? (
                 <tr>
-                  <td colSpan={4} className="px-8 py-24 text-center">
+                  <td colSpan={6} className="px-8 py-24 text-center">
                     <div className="flex flex-col items-center gap-4">
                       <div className="rounded-full bg-zinc-50 p-6 dark:bg-zinc-800/50">
                         <Inbox className="text-4xl text-zinc-300" />
                       </div>
                       <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                        Zero submissions found for this position.
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              ) : null}
-
-              {!isApplicantsLoading && !jobId ? (
-                <tr>
-                  <td colSpan={4} className="px-8 py-32 text-center">
-                    <div className="flex flex-col items-center gap-4 opacity-40">
-                      <Search className="text-5xl text-zinc-300" />
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                        Awaiting role selection from the console.
+                        {jobId ? 'Zero submissions found for this position.' : 'No applications found in the database.'}
                       </p>
                     </div>
                   </td>
@@ -231,4 +247,4 @@ export default function AdminApplications() {
       )}
     </div>
   )
-}
+}

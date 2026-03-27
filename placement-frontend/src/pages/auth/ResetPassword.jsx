@@ -94,10 +94,10 @@ export default function ResetPassword() {
           
           {/* Branding (Keeps user oriented while loading) */}
           <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="h-6 w-6 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-[10px]">
+            <div className="h-6 w-6 rounded-lg bg-brand-500 flex items-center justify-center text-white font-black text-[10px]">
               P
             </div>
-            <span className="font-bold tracking-tight text-xs uppercase opacity-50">PlacementPro</span>
+            <span className="font-black tracking-tight text-xs uppercase opacity-50 text-app">Placement<span className="text-brand-500">Pro</span></span>
           </div>
   
           <div className={`rounded-[2.5rem] border p-12 shadow-2xl transition-all ${
@@ -173,10 +173,10 @@ export default function ResetPassword() {
           {/* Branding */}
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-2 group opacity-50">
-              <div className="h-7 w-7 rounded-lg bg-zinc-400 flex items-center justify-center text-white font-bold text-sm">
+              <div className="h-7 w-7 rounded-lg bg-brand-500 flex items-center justify-center text-white font-black text-sm">
                 P
               </div>
-              <span className="font-bold tracking-tight text-sm uppercase">PlacementPro</span>
+              <span className="font-black tracking-tight text-sm uppercase text-app">Placement<span className="text-brand-500">Pro</span></span>
             </div>
             <ThemeToggle />
           </div>
@@ -298,10 +298,10 @@ export default function ResetPassword() {
         {/* Top Branding / Toggle */}
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-2 group">
-            <div className="h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20">
-              <span className="text-white font-bold text-sm">P</span>
+            <div className="h-7 w-7 rounded-lg bg-brand-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
+              <span className="text-white font-black text-sm">P</span>
             </div>
-            <span className="font-bold tracking-tight text-sm uppercase">PlacementPro</span>
+            <span className="font-black tracking-tight text-sm uppercase">Placement<span className="text-brand-500">Pro</span></span>
           </div>
           <ThemeToggle />
         </div>

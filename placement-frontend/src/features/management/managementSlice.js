@@ -71,6 +71,31 @@ export const deleteTpo = createAsyncThunk(
   },
 )
 
+export const deleteManagement = createAsyncThunk(
+  'management/deleteManagement',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const res = await managementAPI.deleteManagement(payload)
+      return res.data
+    } catch (err) {
+      return rejectWithValue(err?.response?.data || { message: err?.message })
+    }
+  },
+)
+
+export const deleteStudent = createAsyncThunk(
+  'management/deleteStudent',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const res = await managementAPI.deleteStudent(payload)
+      return res.data
+    } catch (err) {
+      return rejectWithValue(err?.response?.data || { message: err?.message })
+    }
+  },
+)
+
+
 export const sendNotice = createAsyncThunk(
   'management/sendNotice',
   async (payload, { rejectWithValue }) => {
@@ -181,6 +206,15 @@ const managementSlice = createSlice({
         toastSuccess(a.payload?.msg || 'TPO deleted')
       })
       .addCase(deleteTpo.rejected, handleRejected)
+      .addCase(deleteManagement.fulfilled, (s, a) => {
+        toastSuccess(a.payload?.msg || 'Management user deleted')
+      })
+      .addCase(deleteManagement.rejected, handleRejected)
+      .addCase(deleteStudent.fulfilled, (s, a) => {
+        toastSuccess(a.payload?.msg || 'Student deleted')
+      })
+      .addCase(deleteStudent.rejected, handleRejected)
+
 
       .addCase(sendNotice.fulfilled, (s, a) => {
         toastSuccess(a.payload?.msg || 'Notice sent')

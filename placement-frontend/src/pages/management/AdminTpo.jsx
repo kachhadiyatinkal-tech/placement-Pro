@@ -4,7 +4,7 @@ import { fetchTpoUsers, deleteTpo } from '../../features/management/managementSl
 import { downloadPDF } from '../../utils/download'
 import { adminAPI } from '../../services/api/adminAPI'
 import { validateEmail, validatePassword, validatePhoneRequired, validateRequired } from '../../utils/validation'
-import { Download, Edit2, Eye, Plus, Briefcase, X, User } from 'lucide-react'
+import { Download, PenLine, Eye, Plus, Briefcase, X, User, Trash } from 'lucide-react'
 import IconButton from '../../components/common/IconButton'
 import Pagination from '../../components/common/Pagination'
 
@@ -126,7 +126,7 @@ export default function AdminTpo() {
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">Official Access</span>
           </div>
           <h1 className="text-3xl font-black uppercase tracking-tighter">
-            TPO <span className="text-indigo-500">Management</span>
+            TPO <span className="text-brand-500">Management</span>
           </h1>
         </div>
 
@@ -199,28 +199,35 @@ export default function AdminTpo() {
                     </div>
                   </td>
                   <td className="px-8 py-6 text-right">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-end gap-1 px-2">
                       <IconButton 
                         icon={Eye} 
                         onClick={() => setSelectedTpo(u)} 
                         title="View Details"
                         variant="zinc"
+                        size={16}
                       />
                       <IconButton 
-                        icon={Edit2} 
+                        icon={PenLine} 
                         onClick={() => {
                           setEditErrors({})
                           setEditingTpo({ ...u, tpoProfile: u?.tpoProfile || {} })
                         }} 
                         title="Edit TPO"
                         variant="indigo"
+                        size={16}
                       />
-                      <button 
-                        onClick={() => dispatch(deleteTpo({ email: u.email }))} 
-                        className={`h-10 px-3 py-1 text-[9px] font-black uppercase rounded-xl border transition-all ${isDark ? 'border-red-500/20 text-red-400 hover:bg-red-500/10' : 'border-red-200 text-red-600 hover:bg-red-50'}`}
-                      >
-                        Delete
-                      </button>
+                      <IconButton 
+                        icon={Trash} 
+                        onClick={() => {
+                          if (window.confirm(`Permanently delete officer ${u.first_name}?`)) {
+                            dispatch(deleteTpo({ email: u.email }))
+                          }
+                        }}
+                        title="Delete TPO"
+                        variant="red"
+                        size={16}
+                      />
                     </div>
                   </td>
                 </tr>

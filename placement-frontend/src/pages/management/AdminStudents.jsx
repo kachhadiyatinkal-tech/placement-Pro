@@ -3,9 +3,10 @@ import { useSelector } from 'react-redux'
 import { adminAPI } from '../../services/api/adminAPI'
 import { downloadPDF } from '../../utils/download'
 import { toastError } from '../../utils/toast'
-import { Download, Edit2, Eye, User, Hash } from 'lucide-react'
+import { Download, PenLine, Eye, Hash, ShieldCheck, X, Trash } from 'lucide-react'
 import IconButton from '../../components/common/IconButton'
 import Pagination from '../../components/common/Pagination'
+import PageHeader from '../../components/ui/PageHeader'
 
 // Helper pickers remain the same
 function safePickName(s) { return s?.first_name || s?.name || s?.fullName || '—' }
@@ -14,8 +15,8 @@ function safePickPhone(s) { return s?.number || s?.phone || '—' }
 
 export default function AdminStudents() {
   const role = useSelector((s) => s.auth.role)
-  // Assuming isDark comes from your theme state
-  const isDark = useSelector((s) => s.theme?.isDark ?? true)
+  const mode = useSelector((s) => s.theme.mode)
+  const isDark = mode === 'dark'
 
   const [students, setStudents] = useState([])
   const [selectedStudent, setSelectedStudent] = useState(null)
@@ -24,7 +25,6 @@ export default function AdminStudents() {
   const [totalPages, setTotalPages] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
 
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
 
@@ -59,102 +59,86 @@ export default function AdminStudents() {
     await loadStudents()
   }
 
-  async function handleUpdateStudent(e) {
-    e.preventDefault()
-    await adminAPI.updateUser({
-      userId: editingStudent?._id,
-      ...editingStudent
-    })
-    setEditingStudent(null)
-    await loadStudents()
+  async function handleDeleteStudent(student) {
+    if (!window.confirm(`Are you sure you want to delete student: ${safePickName(student)}?`)) return
+    try {
+      await adminAPI.deleteStudentUser({ email: student.email })
+      loadStudents()
+    } catch (err) {
+      toastError(err?.response?.data?.message || 'Failed to delete user')
+    }
   }
 
   const downloadRows = useMemo(() => students.map((s) => ({ ...s })), [students])
 
-  // Reset page when search or filters change (if any added later)
-  useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) setCurrentPage(totalPages)
-  }, [students.length, totalPages])
-
   return (
-    <div className="space-y-8 p-2">
+    <div className="space-y-6 max-w-7xl mx-auto py-4 animate-fade-in">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-500">
-              <User className="text-xs" />
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500">
-              User Management
-            </span>
-          </div>
-          <h1 className={`text-3xl font-black uppercase tracking-tighter ${isDark ? 'text-white' : 'text-zinc-900'}`}>
-            Students <span className="text-emerald-500">Database</span>
-          </h1>
-          <p className={`mt-2 text-xs font-bold uppercase tracking-widest ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-            Manage and export student accounts {role ? `• Access: ${role}` : ''}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className={`px-4 py-2 rounded-2xl border flex items-center gap-3 ${isDark ? 'border-zinc-800 bg-zinc-900/50' : 'border-zinc-100 bg-white'}`}>
-            <div className="text-right">
-              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 leading-none">Total Records</p>
-              <p className={`text-lg font-black ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                {loading ? '--' : students.length}
-              </p>
+      <PageHeader 
+        title="Students Database" 
+        subtitle="Manage and export student pool records"
+        actionButton={
+          <div className="flex items-center gap-3">
+            <div className={`hidden md:flex px-4 py-2 rounded-2xl border border-app bg-surface shadow-sm items-center gap-4 transition-all duration-500`}>
+              <div className="flex flex-col">
+                <span className="text-[9px] font-black uppercase tracking-widest text-muted opacity-60">Total Pool</span>
+                <span className="text-sm font-black text-app leading-none mt-1">
+                  {loading ? '--' : totalItems}
+                </span>
+              </div>
+              <div className="h-6 w-px bg-app" />
+              <button
+                onClick={() =>
+                  downloadPDF(`students-${new Date().toISOString().slice(0, 10)}.pdf`, downloadRows, undefined, {
+                    title: 'Students export',
+                  })
+                }
+                disabled={loading || !students.length}
+                className="group flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-white transition-all active:scale-90 hover:shadow-lg shadow-brand-500/20 disabled:opacity-30"
+              >
+                <Download size={16} />
+              </button>
             </div>
-            <button
-              onClick={() =>
-                downloadPDF(`students-${new Date().toISOString().slice(0, 10)}.pdf`, downloadRows, undefined, {
-                  title: 'Students export',
-                })
-              }
-              disabled={loading || !students.length}
-              className={`h-10 w-10 flex items-center justify-center rounded-xl transition-all active:scale-95 ${isDark ? 'bg-zinc-800 text-white hover:bg-zinc-700' : 'bg-zinc-100 text-zinc-900 hover:bg-zinc-200'
-                }`}
-            >
-              <Download />
-            </button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Main Table Container */}
-      <div className={`overflow-hidden rounded-[2.5rem] border transition-all duration-300 ${isDark ? 'border-zinc-800 bg-zinc-950/50 backdrop-blur-md' : 'border-zinc-100 bg-white shadow-2xl shadow-zinc-200/50'
-        }`}>
-        <div className="overflow-x-auto max-h-[600px] custom-scrollbar">
+      <div className="rounded-[2.5rem] border border-app bg-surface shadow-sm overflow-hidden transition-all duration-500">
+        <div className="overflow-x-auto custom-scrollbar min-h-[400px]">
           <table className="w-full text-left border-collapse">
-            <thead className="sticky top-0 z-10">
-              <tr className={`border-b ${isDark ? 'border-zinc-800/50 bg-zinc-900/90 backdrop-blur-md' : 'border-zinc-100 bg-zinc-50/90 backdrop-blur-md'}`}>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Student Identity</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Contact Info</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Account Status</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-right">Actions</th>
+            <thead>
+              <tr className="border-b border-app bg-surface-soft/50">
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted">Identity</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted">Contact Details</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted">System Status</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted text-right">Operations</th>
               </tr>
             </thead>
-            <tbody className={`divide-y ${isDark ? 'divide-zinc-800/50' : 'divide-zinc-100'}`}>
+            <tbody className="divide-y divide-app">
               {(students || []).map((s) => (
-                <tr key={s?._id} className={`group transition-colors ${isDark ? 'hover:bg-indigo-400/[0.03]' : 'hover:bg-indigo-600/[0.02]'}`}>
+                <tr key={s?._id} className="group transition-colors hover:bg-surface-soft/30">
                   <td className="px-8 py-6">
                     <div className="flex flex-col">
-                      <span className={`text-sm font-black uppercase tracking-tight ${isDark ? 'text-zinc-100' : 'text-zinc-900'}`}>
+                      <span className="text-sm font-black tracking-tight text-app uppercase">
                         {safePickName(s)}
                       </span>
-                      <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
-                        ID: {s?._id?.slice(-8) || 'N/A'}
-                      </span>
+                      <div className="flex items-center gap-1.5 mt-1.5">
+                        <Hash size={10} className="text-brand-500" />
+                        <span className="text-[9px] font-bold text-muted uppercase tracking-widest leading-none">
+                          {s?._id?.slice(-8) || 'N/A'}
+                        </span>
+                      </div>
                     </div>
                   </td>
                   <td className="px-8 py-6">
-                    <div className="flex flex-col gap-1">
-                      <span className={`text-xs font-bold ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>{safePickEmail(s)}</span>
-                      <span className="text-[10px] font-medium text-zinc-500 italic">{safePickPhone(s)}</span>
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-xs font-bold text-app opacity-80">{safePickEmail(s)}</span>
+                      <span className="text-[10px] font-medium text-muted tracking-wide">{safePickPhone(s)}</span>
                     </div>
                   </td>
                   <td className="px-8 py-6">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       {/* The Toggle Switch */}
                       <label className="relative inline-flex cursor-pointer items-center">
                         <input
@@ -164,54 +148,46 @@ export default function AdminStudents() {
                           onChange={() => toggleStudentActive(s)}
                         />
                         <div className={`
-        group relative h-5 w-9 rounded-full transition-all duration-300
-        ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'}
-        peer-checked:bg-emerald-500/20
-        after:absolute after:top-[2px] after:left-[2px] after:h-4 after:w-4 
-        after:rounded-full after:transition-all after:duration-300
-        ${isDark ? 'after:bg-zinc-500' : 'after:bg-white'}
-        peer-checked:after:translate-x-full peer-checked:after:bg-emerald-500
-        peer-focus:ring-2 peer-focus:ring-emerald-500/20
-      `}>
-                          {/* Subtle Inner Glow for Dark Mode */}
-                          {isDark && (
-                            <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity bg-white/5" />
-                          )}
-                        </div>
+                          h-5 w-9 rounded-full transition-all duration-300 bg-surface-soft border border-app
+                          peer-checked:bg-emerald-500/20 peer-checked:border-emerald-500/30
+                          after:absolute after:top-[3px] after:left-[3px] after:h-3.5 after:w-3.5 
+                          after:rounded-full after:transition-all after:duration-300 after:bg-muted/30
+                          peer-checked:after:translate-x-[16px] peer-checked:after:bg-emerald-500 shadow-inner
+                          peer-focus:ring-4 peer-focus:ring-emerald-500/10
+                        `} />
                       </label>
-
+ 
                       {/* Status Label */}
-                      <span className={`text-[10px] font-black uppercase tracking-widest transition-colors duration-300 ${s?.isActive === false
-                          ? 'text-zinc-500'
-                          : 'text-emerald-500'
-                        }`}>
-                        {s?.isActive === false ? 'Offline' : 'Active'}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-300 ${s?.isActive === false
+                            ? 'text-muted opacity-50'
+                            : 'text-emerald-500'
+                          }`}>
+                          {s?.isActive === false ? 'Suspended' : 'Verified'}
+                        </span>
+                      </div>
                     </div>
                   </td>
                   <td className="px-8 py-6 text-right">
-                    <div className="flex justify-end items-center gap-2">
+                    <div className="flex justify-end items-center gap-1 px-2">
                       <IconButton 
                         icon={Eye} 
                         onClick={() => setSelectedStudent(s)} 
-                        title="View Details"
                         variant="zinc"
+                        size={16}
                       />
                       <IconButton 
-                        icon={Edit2} 
+                        icon={PenLine} 
                         onClick={() => setEditingStudent({ ...s })} 
-                        title="Edit Profile"
                         variant="indigo"
+                        size={16}
                       />
-                      <button
-                        onClick={() => toggleStudentActive(s)}
-                        className={`ml-2 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all h-10 ${s?.isActive === false
-                            ? 'border-emerald-500/50 text-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 hover:text-white'
-                            : 'border-zinc-700 text-zinc-400 hover:bg-red-500 hover:border-red-500 hover:text-white'
-                          }`}
-                      >
-                        {s?.isActive === false ? 'Activate' : 'Suspend'}
-                      </button>
+                      <IconButton 
+                        icon={Trash} 
+                        onClick={() => handleDeleteStudent(s)} 
+                        variant="red"
+                        size={16}
+                      />
                     </div>
                   </td>
                 </tr>
@@ -233,36 +209,60 @@ export default function AdminStudents() {
         }}
       />
 
-      {/* Modern Modal for Details/Edit (shared logic) */}
+      {/* Modern Modal for Details/Edit */}
       {(selectedStudent || editingStudent) && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-xl bg-black/40">
-          <div
-            className={`relative w-full max-w-2xl rounded-[2.5rem] border shadow-2xl transition-all duration-500 ${isDark ? 'bg-zinc-950 border-zinc-800' : 'bg-white border-zinc-100'
-              }`}
-          >
-            {/* Modal UI Content here... */}
-            <div className="p-10">
-              <h2 className={`text-2xl font-black uppercase tracking-tighter ${isDark ? 'text-white' : 'text-zinc-900'}`}>
-                {editingStudent ? 'Update Profile' : 'Student Overview'}
-              </h2>
-              <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-8">
-                System Reference: {(selectedStudent?._id || editingStudent?._id)}
-              </p>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-3xl bg-black/60 transition-all duration-500">
+          <div className="relative w-full max-w-xl rounded-[2.5rem] border border-app bg-surface shadow-2xl p-8 animate-modal-in transform">
+            <button 
+              onClick={() => { setSelectedStudent(null); setEditingStudent(null); }}
+              className="absolute top-8 right-8 text-muted hover:text-app transition-colors"
+            >
+              <X size={20} />
+            </button>
 
-              {/* Form or Info Grid */}
-              <div className="grid grid-cols-2 gap-6">
-                {/* Map your fields here based on whether editing or viewing */}
-              </div>
+            <div className="mb-8">
+               <div className="inline-flex items-center gap-2 rounded-full bg-brand-500/10 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-brand-500 border border-brand-500/20 mb-4">
+                 <ShieldCheck size={12} /> Student Records
+               </div>
+               <h2 className="text-3xl font-black tracking-tighter text-app uppercase">
+                 {editingStudent ? 'Update Details' : 'Student Overview'}
+               </h2>
+               <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-2">
+                 Registry ID: {(selectedStudent?._id || editingStudent?._id)}
+               </p>
+            </div>
 
-              <div className="mt-10 flex justify-end gap-3">
-                <button
-                  onClick={() => { setSelectedStudent(null); setEditingStudent(null); }}
-                  className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${isDark ? 'bg-zinc-800 text-zinc-400 hover:text-white' : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
-                    }`}
-                >
-                  Close Window
-                </button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+              <div className="space-y-1">
+                <p className="text-[9px] font-black uppercase tracking-widest text-muted opacity-60">Full Name</p>
+                <p className="text-sm font-bold text-app">{safePickName(selectedStudent || editingStudent)}</p>
               </div>
+              <div className="space-y-1">
+                <p className="text-[9px] font-black uppercase tracking-widest text-muted opacity-60">Auth Level</p>
+                <p className="text-sm font-bold text-brand-500 uppercase tracking-tighter">Verified Professional</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[9px] font-black uppercase tracking-widest text-muted opacity-60">Email Access</p>
+                <p className="text-sm font-bold text-app">{safePickEmail(selectedStudent || editingStudent)}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[9px] font-black uppercase tracking-widest text-muted opacity-60">Telecom Identifier</p>
+                <p className="text-sm font-bold text-app">{safePickPhone(selectedStudent || editingStudent)}</p>
+              </div>
+            </div>
+
+            <div className="mt-10 flex gap-3">
+              <button
+                onClick={() => { setSelectedStudent(null); setEditingStudent(null); }}
+                className="flex-1 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all bg-surface-soft text-muted hover:bg-surface hover:text-app border border-app"
+              >
+                Dismiss Window
+              </button>
+              {editingStudent && (
+                 <button className="flex-1 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all bg-brand-600 text-white hover:bg-brand-700 shadow-lg shadow-brand-500/20">
+                   Synchronize Changes
+                 </button>
+              )}
             </div>
           </div>
         </div>

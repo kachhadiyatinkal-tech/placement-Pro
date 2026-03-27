@@ -11,29 +11,25 @@ export default function ThemeToggle() {
     <button
       type="button"
       onClick={() => dispatch(toggleTheme())}
-      className={`group relative inline-flex items-center gap-2 rounded-xl border px-3 py-1.5 transition-all duration-300 active:scale-95 ${isDark
-          ? 'border-zinc-800 bg-zinc-900/50 text-brand-400 hover:border-brand-500/50'
-          : 'border-zinc-200 bg-white text-brand-600 shadow-sm hover:border-brand-600/30'
-        }`}
+      className="group relative inline-flex items-center gap-2 rounded-xl border border-app bg-surface px-3 py-1.5 transition-all duration-500 active:scale-95 hover:border-brand-500/50 shadow-sm"
       aria-label="Toggle theme"
     >
-      <div className="flex h-5 w-5 items-center justify-center transition-transform duration-500 group-hover:rotate-[20deg]">
+      <div className="flex h-5 w-5 items-center justify-center transition-transform duration-500 group-hover:rotate-[20deg] text-brand-500">
         {isDark ? (
-          <Moon size={16} />
+          <Moon size={16} fill="currentColor" fillOpacity={0.2} />
         ) : (
-          <Sun size={16} />
+          <Sun size={16} fill="currentColor" fillOpacity={0.2} />
         )}
       </div>
 
       <div className="hidden flex-col items-start leading-none sm:flex">
-        <span className="text-[9px] font-bold uppercase tracking-wider">
+        <span className="text-[9px] font-black uppercase tracking-wider text-app">
           {mode}
         </span>
       </div>
 
       {/* Subtle hover glow effect */}
-      <div className={`absolute inset-0 -z-10 rounded-xl opacity-0 blur-lg transition-opacity group-hover:opacity-20 ${isDark ? 'bg-brand-500' : 'bg-brand-400'
-        }`} />
+      <div className="absolute inset-0 -z-10 rounded-xl bg-brand-500 opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-20" />
     </button>
   )
 }

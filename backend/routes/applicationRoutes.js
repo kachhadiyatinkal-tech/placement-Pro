@@ -4,6 +4,7 @@ const {
   applyToJob,
   getStudentApplications,
   getJobApplicants,
+  getAllApplications,
   updateApplicationStatus,
   scheduleInterview,
   uploadOfferLetterEndpoint,
@@ -16,6 +17,7 @@ const router = express.Router();
 router.post('/apply/:jobId', authenticateToken, applyToJob);
 router.get('/student', authenticateToken, getStudentApplications);
 router.get('/job/:jobId', authenticateToken, getJobApplicants);
+router.get('/all', authenticateToken, getAllApplications);
 router.put('/status/:applicationId', authenticateToken, updateApplicationStatus);
 router.put('/schedule-interview/:id', authenticateToken, scheduleInterview);
 router.put('/upload-offer/:id', authenticateToken, uploadOfferLetter.single('offerLetter'), uploadOfferLetterEndpoint);

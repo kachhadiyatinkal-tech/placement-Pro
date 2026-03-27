@@ -46,6 +46,19 @@ export const fetchApplicants = createAsyncThunk(
   },
 )
 
+export const fetchAllApplicants = createAsyncThunk(
+  'jobs/fetchAllApplicants',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await jobAPI.fetchAllApplications()
+      return { data: res.data }
+    } catch (err) {
+      return rejectWithValue(err?.response?.data || { message: err?.message })
+    }
+  },
+)
+
+
 export const applyToJob = createAsyncThunk(
   'jobs/applyToJob',
   async ({ jobId }, { rejectWithValue }) => {
@@ -153,6 +166,20 @@ const jobSlice = createSlice({
         state.applicantsByJobId[action.payload.jobId] = applicants
       })
       .addCase(fetchApplicants.rejected, rejected)
+
+      .addCase(fetchAllApplicants.pending, pending)
+      .addCase(fetchAllApplicants.fulfilled, (state, action) => {
+        state.status = 'succeeded'
+        const applicants =
+          action.payload?.data?.applicantsList ||
+          action.payload?.data?.applicants ||
+          action.payload?.data?.data ||
+          action.payload?.data ||
+          []
+        state.applicantsByJobId['all'] = applicants
+      })
+      .addCase(fetchAllApplicants.rejected, rejected)
+
 
       .addCase(applyToJob.pending, pending)
       .addCase(applyToJob.fulfilled, (state) => {

@@ -103,12 +103,14 @@ export default function Login() {
       <div className="mx-auto w-full max-w-md space-y-6">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white shadow-lg shadow-indigo-600/25">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-sm font-black text-white shadow-lg shadow-brand-500/25">
               P
             </div>
             <div>
-              <p className="text-sm font-bold tracking-tight">PlacementPro</p>
-              <p className={`text-xs ${isDark ? 'text-zinc-500' : 'text-zinc-500'}`}>Campus placements</p>
+              <p className="text-sm font-black tracking-tight uppercase">
+                Placement<span className="text-brand-500">Pro</span>
+              </p>
+              <p className="text-[9px] font-bold uppercase tracking-widest text-muted opacity-60">Elite Suite</p>
             </div>
           </div>
           <ThemeToggle />

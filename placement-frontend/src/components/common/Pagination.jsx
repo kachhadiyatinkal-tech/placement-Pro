@@ -40,15 +40,15 @@ export default function Pagination({
   }
 
   const btnBase = "flex h-10 w-10 items-center justify-center rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all active:scale-90 cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
-  const idle = isDark ? "bg-zinc-900 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-600"
-  const active = isDark ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
+  const idle = "bg-surface-soft text-muted hover:bg-surface hover:text-app border border-app"
+  const active = "bg-brand-600 text-white shadow-lg shadow-brand-500/20 border-brand-600"
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1
   const endItem = totalItems === 0 ? 0 : Math.min(currentPage * itemsPerPage, totalItems)
 
   return (
     <div className="mt-8 flex flex-col items-center justify-between gap-4 px-6 pb-6 sm:flex-row">
-      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-        Showing <span className={isDark ? "text-zinc-300" : "text-zinc-900"}>{startItem}</span> to <span className={isDark ? "text-zinc-300" : "text-zinc-900"}>{endItem}</span> of <span className={isDark ? "text-zinc-300" : "text-zinc-900"}>{totalItems}</span> results
+      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-muted">
+        Showing <span className="text-app">{startItem}</span> to <span className="text-app">{endItem}</span> of <span className="text-app">{totalItems}</span> results
       </div>
 
       <div className="flex items-center gap-2">
@@ -56,7 +56,7 @@ export default function Pagination({
           <select
             value={itemsPerPage}
             onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-            className={`h-10 rounded-xl border px-2 text-xs font-bold ${isDark ? 'border-zinc-700 bg-zinc-900 text-zinc-200' : 'border-zinc-200 bg-white text-zinc-700'}`}
+            className={`h-10 rounded-xl border border-app bg-surface px-2 text-[10px] font-bold uppercase tracking-widest text-muted outline-none focus:border-brand-500/50 transition-all`}
             title="Items per page"
           >
             {pageSizeOptions.map((size) => (
@@ -70,18 +70,20 @@ export default function Pagination({
           className={`${btnBase} ${idle}`}
           title="Previous Page"
         >
-          <ChevronLeft size={18} />
+          <ChevronLeft size={16} />
         </button>
 
-        {getPageNumbers().map(num => (
-          <button
-            key={num}
-            onClick={() => onPageChange(num)}
-            className={`${btnBase} ${num === currentPage ? active : idle}`}
-          >
-            {num}
-          </button>
-        ))}
+        <div className="flex items-center gap-1.5">
+          {getPageNumbers().map(num => (
+            <button
+              key={num}
+              onClick={() => onPageChange(num)}
+              className={`${btnBase} ${num === currentPage ? active : idle}`}
+            >
+              {num}
+            </button>
+          ))}
+        </div>
 
         <button
           onClick={() => onPageChange(currentPage + 1)}
@@ -89,7 +91,7 @@ export default function Pagination({
           className={`${btnBase} ${idle}`}
           title="Next Page"
         >
-          <ChevronRight size={18} />
+          <ChevronRight size={16} />
         </button>
       </div>
     </div>

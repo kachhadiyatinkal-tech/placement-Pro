@@ -25,18 +25,15 @@ function SidebarLayoutInner() {
 
   return (
     <div
-      className={`min-h-dvh transition-colors duration-500 selection:bg-brand-500/30 ${isDark ? 'bg-[#030303] text-zinc-50' : 'bg-surf-light-50 text-zinc-900'
-        }`}
+      className={`min-h-dvh transition-colors duration-500 selection:bg-brand-500/30 bg-app text-app`}
     >
       {/* Premium background effects */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div
-          className={`absolute -left-[5%] -top-[5%] h-[30%] w-[30%] rounded-full blur-[100px] opacity-20 ${isDark ? 'bg-brand-900/30' : 'bg-brand-200'
-            }`}
+          className={`absolute -left-[5%] -top-[5%] h-[30%] w-[30%] rounded-full blur-[100px] opacity-20 bg-brand-500/10 dark:bg-brand-900/10`}
         />
         <div
-          className={`absolute -bottom-[5%] -right-[5%] h-[30%] w-[30%] rounded-full blur-[100px] opacity-10 ${isDark ? 'bg-indigo-900/20' : 'bg-indigo-100'
-            }`}
+          className={`absolute -bottom-[5%] -right-[5%] h-[30%] w-[30%] rounded-full blur-[100px] opacity-10 bg-indigo-500/10 dark:bg-indigo-900/10`}
         />
       </div>
 
@@ -52,7 +49,7 @@ function SidebarLayoutInner() {
         <Sidebar />
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <header className="shrink-0 border-b border-zinc-200/50 bg-white/50 backdrop-blur-md dark:border-zinc-800/50 dark:bg-black/20">
+          <header className={`shrink-0 border-b border-app bg-surface/70 backdrop-blur-xl transition-[background-color,border-color] duration-500`}>
             <Navbar />
           </header>
 

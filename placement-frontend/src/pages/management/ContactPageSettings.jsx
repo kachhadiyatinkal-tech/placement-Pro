@@ -84,8 +84,8 @@ export default function ContactPageSettings() {
         <div className="mb-2 inline-block rounded-xl border border-emerald-600/20 bg-emerald-600/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
           {isTpo ? 'TPO' : 'Admin'} · Campus content
         </div>
-        <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
-          Contact page
+        <h1 className="text-3xl font-black tracking-tight text-app uppercase">
+          Contact <span className="text-brand-500">Page</span>
         </h1>
         <p className="mt-2 text-sm text-zinc-500">
           These details appear on the public <span className="font-semibold text-zinc-700 dark:text-zinc-300">/contact</span>{' '}

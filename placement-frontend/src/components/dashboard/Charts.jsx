@@ -22,11 +22,11 @@ export default function Charts({ trends, companyStats, branchStats }) {
   const mode = useSelector((s) => s.theme?.mode) || 'light'
   const isDark = mode === 'dark'
 
-  const textColor = isDark ? '#f5f5f4' : '#292524'
-  const gridColor = isDark ? '#44403c' : '#e7e5e4'
-  const tooltipBg = isDark ? '#1c1917' : '#ffffff'
+  const textColor = isDark ? '#fafafa' : '#09090b'
+  const gridColor = isDark ? '#27272a' : '#e4e4e7'
+  const tooltipBg = isDark ? '#18181b' : '#ffffff'
 
-  const chartContainerClass = "rounded-2xl border border-zinc-200 bg-white p-6 shadow-md dark:border-zinc-800 dark:bg-stone-900"
+  const chartContainerClass = "rounded-3xl border border-app bg-surface p-6 shadow-sm transition-all duration-300"
   
   return (
     <div className="mt-8 flex flex-col gap-8">

@@ -54,8 +54,8 @@ export const Footer = () => {
               <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-500 flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
                 P
               </div>
-              <span className={`text-2xl font-black tracking-tight ${isDark ? "text-white" : "text-zinc-900"}`}>
-                Placement<span className="text-indigo-600 dark:text-indigo-400">Pro</span>
+              <span className={`text-2xl font-black tracking-tight uppercase ${isDark ? "text-white" : "text-zinc-900"}`}>
+                Placement<span className="text-brand-500">Pro</span>
               </span>
             </Link>
             <p className="text-sm leading-relaxed max-w-sm font-medium">
@@ -110,8 +110,8 @@ export const Footer = () => {
         {/* BOTTOM SECTION */}
         <div className={`pt-10 border-t flex flex-col md:flex-row justify-between items-center gap-8 ${isDark ? "border-zinc-900" : "border-zinc-200"
           }`}>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-            © 2026 PlacementPro CMS. All rights reserved.
+          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+            © 2026 Placement<span className="text-brand-500">Pro</span> CMS. All rights reserved.
           </p>
 
           <div className="flex items-center gap-8">

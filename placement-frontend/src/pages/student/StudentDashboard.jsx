@@ -59,8 +59,8 @@ export default function StudentDashboard() {
           <span className="h-1.5 w-1.5 rounded-full bg-brand-500 animate-pulse" />
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-500">Candidate Dashboard</span>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Systems <span className="text-zinc-500">Overview</span>
+        <h1 className="text-3xl font-black tracking-tight uppercase leading-none">
+          Systems <span className="text-brand-500">Overview</span>
         </h1>
         <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest">
           Hello, {user?.first_name || 'Candidate'} — Welcome back.
@@ -99,7 +99,7 @@ export default function StudentDashboard() {
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-500">Self-Evaluation Matrix</span>
             </div>
             <div>
-              <h2 className="text-xl font-bold tracking-tight">
+              <h2 className="text-xl font-black uppercase tracking-tight">
                 Skill <span className="text-brand-500">Evolution</span> Analysis
               </h2>
               <p className="mt-1 text-[11px] font-medium text-zinc-500 uppercase tracking-wider leading-relaxed">
@@ -133,7 +133,7 @@ export default function StudentDashboard() {
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-500">Credential Manager</span>
             </div>
             <div>
-              <h2 className="text-xl font-bold tracking-tight">
+              <h2 className="text-xl font-black uppercase tracking-tight">
                 Resume <span className="text-brand-500">Update</span>
               </h2>
               <p className="mt-1 text-[11px] font-medium text-zinc-500 uppercase tracking-wider leading-relaxed">

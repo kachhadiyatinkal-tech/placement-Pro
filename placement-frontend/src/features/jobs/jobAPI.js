@@ -10,6 +10,8 @@ export const jobAPI = {
   },
   deleteJob: (jobId) => api.post('/api/v1/tpo/delete-job', { jobId }),
   fetchJobApplicants: (jobId) => api.get(`/api/applications/job/${jobId}`),
+  fetchAllApplications: () => api.get('/api/applications/all'),
+
 
   // Student
   applyToJob: ({ jobId, ...payload }) => api.post(`/api/applications/apply/${jobId}`, payload),

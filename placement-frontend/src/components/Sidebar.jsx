@@ -70,8 +70,8 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-[60] flex h-dvh max-h-dvh w-[min(18rem,88vw)] shrink-0 flex-col overflow-hidden border-r shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:static lg:z-auto lg:h-full lg:w-64 lg:max-h-none lg:translate-x-0 lg:shadow-none ${open ? 'translate-x-0' : '-translate-x-full'
-        } ${isDark ? 'border-zinc-800 bg-zinc-950' : 'border-zinc-200 bg-white'}`}
+      className={`fixed inset-y-0 left-0 z-[60] flex h-dvh max-h-dvh w-[min(18rem,88vw)] shrink-0 flex-col overflow-hidden border-r shadow-2xl transition-[transform,background-color,border-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:static lg:z-auto lg:h-full lg:w-64 lg:max-h-none lg:translate-x-0 lg:shadow-none ${open ? 'translate-x-0' : '-translate-x-full'
+        } border-app bg-surface`}
     >
       <div className="mb-2 p-6">
         <div className="flex items-center gap-3">
@@ -79,32 +79,35 @@ export default function Sidebar() {
             <Logo className="h-6 w-6 text-white" />
           </div>
           <div className="min-w-0">
-            <p className={`text-sm font-bold tracking-tight ${isDark ? 'text-zinc-50' : 'text-zinc-900'}`}>PlacementPro</p>
-            <p className="truncate text-[10px] font-medium uppercase tracking-widest text-brand-500">Elite Suite</p>
+            <p className="text-sm font-black tracking-tight text-app uppercase">
+              Placement<span className="text-brand-500">Pro</span>
+            </p>
+            <p className="truncate text-[10px] font-black uppercase tracking-widest text-app opacity-50">
+              Elite <span className="text-brand-500">Suite</span>
+            </p>
           </div>
         </div>
       </div>
 
       <nav className="custom-scrollbar mt-4 min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden px-4 pb-4">
-        <div className="mb-2 px-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400/80">Main Menu</div>
+        <div className="mb-2 px-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-app opacity-40">Main Menu</div>
         {links.map((l) => (
           <LinkItem key={l.to} {...l} onNavigate={close} />
         ))}
       </nav>
 
-      <div className={`shrink-0 border-t p-4 ${isDark ? 'border-zinc-800 bg-zinc-900/10' : 'border-zinc-100 bg-zinc-50/10'}`}>
+      <div className={`shrink-0 border-t p-4 border-app bg-surface-soft/30`}>
         <NavLink
           to={profilePath}
           onClick={close}
           className={({ isActive }) =>
             `group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-300 ${isActive
               ? 'bg-brand-500/10 text-brand-500 ring-1 ring-brand-500/20'
-              : 'text-zinc-500 hover:bg-zinc-50 dark:text-zinc-400 dark:hover:bg-zinc-800/50'
+              : 'text-muted hover:bg-surface-soft'
             }`
           }
         >
-          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-all duration-300 ${isDark ? 'border-zinc-700 bg-zinc-800' : 'border-zinc-200 bg-white shadow-sm'
-            }`}>
+          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-app bg-surface transition-all duration-300`}>
             <Settings className="text-base transition-transform duration-300 group-hover:rotate-45" />
           </div>
           <span className="text-[11px] font-bold uppercase tracking-wider">My Profile</span>

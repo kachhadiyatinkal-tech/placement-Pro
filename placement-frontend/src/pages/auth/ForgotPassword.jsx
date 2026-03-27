@@ -92,10 +92,10 @@ export default function ForgotPassword() {
           {/* Top Branding */}
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-2 group">
-              <div className="h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20">
-                <span className="text-white font-bold text-sm">P</span>
+              <div className="h-7 w-7 rounded-lg bg-brand-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                <span className="text-white font-black text-xs">P</span>
               </div>
-              <span className="font-bold tracking-tight text-sm uppercase">PlacementPro</span>
+              <span className="font-black tracking-tight text-sm uppercase">Placement<span className="text-brand-500">Pro</span></span>
             </div>
             <ThemeToggle />
           </div>
@@ -211,10 +211,10 @@ export default function ForgotPassword() {
         {/* Branding & Theme Toggle */}
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-2 group">
-            <div className="h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20 text-white font-bold text-sm">
+            <div className="h-7 w-7 rounded-lg bg-brand-500 flex items-center justify-center shadow-lg shadow-brand-500/20 text-white font-black text-xs">
               P
             </div>
-            <span className="font-bold tracking-tight text-sm uppercase">PlacementPro</span>
+            <span className="font-black tracking-tight text-sm uppercase">Placement<span className="text-brand-500">Pro</span></span>
           </div>
           <ThemeToggle />
         </div>

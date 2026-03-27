@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Download, Edit3, Eye, Plus, Trash2, Globe, MapPin, Activity, X } from 'lucide-react'
+import { Download, PenLine, Eye, Plus, Trash, Globe, MapPin, Activity, X } from 'lucide-react'
 import IconButton from '../../components/common/IconButton'
 import Pagination from '../../components/common/Pagination'
 import { fetchCompanies, addCompany, deleteCompany } from '../../features/companies/companiesSlice'
@@ -116,7 +116,7 @@ export default function AdminCompanies() {
           <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-indigo-600/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-600 border border-indigo-600/20">
             <Activity /> Partner Registry
           </div>
-          <h1 className="text-3xl font-black tracking-tight uppercase leading-none">Corporate Entities</h1>
+          <h1 className="text-3xl font-black tracking-tight uppercase leading-none">Corporate <span className="text-brand-500">Entities</span></h1>
         </div>
 
         <div className="flex gap-3">
@@ -140,37 +140,42 @@ export default function AdminCompanies() {
         </div>
       </div>
 
-      {/* Main Table */}
-      <div className={`overflow-hidden rounded-[2.5rem] border transition-all ${isDark ? 'border-zinc-800 bg-zinc-900/40 shadow-2xl' : 'border-zinc-100 bg-white shadow-xl shadow-zinc-200/50'
-        }`}>
-        <div className="overflow-x-auto">
+      {/* Main Table Card */}
+      <div className={`overflow-hidden rounded-[2.5rem] border transition-all ${
+        isDark ? 'border-zinc-800 bg-zinc-900/40 shadow-2xl shadow-zinc-950/50' : 'border-zinc-100 bg-white shadow-2xl shadow-zinc-200/50'
+      }`}>
+        <div className="border-b border-zinc-100 px-8 py-5 dark:border-zinc-800/50">
+           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Database Status: <span className="text-emerald-500">{companies.length} Registered Entities</span></p>
+        </div>
+
+        <div className="overflow-x-auto min-h-[400px]">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className={`border-b ${isDark ? 'border-zinc-800 bg-zinc-950/30' : 'border-zinc-50 bg-zinc-50/50'}`}>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Name</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Location</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Corporate Identity</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-center">Location</th>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-center">Difficulty</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-center">Status</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-right">Actions</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-center">Account Status</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-right">Operations</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {paginatedCompanies.map((c) => (
-                <tr key={c._id} className="transition-colors hover:bg-indigo-600/[0.02]">
+                <tr key={c._id} className="group transition-colors hover:bg-indigo-600/[0.02]">
                   <td className="px-8 py-6">
-                    <p className="text-sm font-black uppercase tracking-tight">{c.companyName}</p>
-                    <p className="text-[10px] font-bold text-zinc-500 truncate max-w-[200px]">{c.email || 'No admin email'}</p>
+                    <p className={`text-sm font-black uppercase tracking-tight ${isDark ? 'text-zinc-100' : 'text-zinc-900'}`}>{c.companyName}</p>
+                    <p className="text-[10px] font-bold text-zinc-500 truncate max-w-[200px] mt-1">{c.email || 'No admin email'}</p>
                   </td>
-                  <td className="px-8 py-6">
-                    <div className="flex items-center gap-2 text-xs font-bold text-zinc-500">
-                      <MapPin className="opacity-40" />
+                  <td className="px-8 py-6 text-center">
+                    <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                      <MapPin size={12} className="opacity-40" />
                       {c.companyLocation || 'Remote'}
                     </div>
                   </td>
                   <td className="px-8 py-6 text-center">
-                    <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${c.companyDifficulty === 'Hard' ? 'text-red-500 bg-red-500/10' :
-                        c.companyDifficulty === 'Easy' ? 'text-emerald-500 bg-emerald-500/10' :
-                          'text-amber-500 bg-amber-500/10'
+                    <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${c.companyDifficulty === 'Hard' ? (isDark ? 'text-red-400 bg-red-400/10 border-red-400/20' : 'text-red-600 bg-red-50 border-red-100') :
+                        c.companyDifficulty === 'Easy' ? (isDark ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : 'text-emerald-600 bg-emerald-50 border-emerald-100') :
+                          (isDark ? 'text-amber-400 bg-amber-400/10 border-amber-400/20' : 'text-amber-600 bg-amber-50 border-amber-100')
                       }`}>
                       {c.companyDifficulty || 'Moderate'}
                     </span>
@@ -190,27 +195,31 @@ export default function AdminCompanies() {
                     </div>
                   </td>
                   <td className="px-8 py-6 text-right">
-                    <div className="flex justify-end gap-2">
-                      <IconButton 
+                    <div className="flex justify-end gap-1 px-2">
+                       <IconButton 
                         icon={Eye} 
                         onClick={() => setSelectedCompany(c)} 
-                        title="View Details"
                         variant="zinc"
+                        size={16}
                       />
-                      <IconButton 
-                        icon={Edit3} 
+                       <IconButton 
+                        icon={PenLine} 
                         onClick={() => {
                           setEditCompanyErrors({})
                           setEditingCompany({ ...c })
                         }} 
-                        title="Edit Company"
                         variant="indigo"
+                        size={16}
                       />
-                      <IconButton 
-                        icon={Trash2} 
-                        onClick={() => dispatch(deleteCompany(c._id))} 
-                        title="Delete Company"
+                       <IconButton 
+                        icon={Trash} 
+                        onClick={() => {
+                            if (window.confirm(`Permanently remove ${c.companyName}?`)) {
+                                dispatch(deleteCompany(c._id))
+                            }
+                        }} 
                         variant="red"
+                        size={16}
                       />
                     </div>
                   </td>

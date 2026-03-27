@@ -151,8 +151,8 @@ export default function AdminChatbotSettings() {
           <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
             <Shield size={12} /> System Admin
           </div>
-          <h1 className="text-4xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
-            Assistant <span className="text-indigo-600">Configuration</span>
+          <h1 className="text-4xl font-black tracking-tight text-app uppercase leading-none">
+            Assistant <span className="text-brand-500">Configuration</span>
           </h1>
           <p className="max-w-xl text-sm font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed">
             Customize your AI assistant's personality and appearance. Changes are synchronized across all user dashboards instantly.
@@ -202,13 +202,17 @@ export default function AdminChatbotSettings() {
           ) : (
             <form id="chatbot-form" onSubmit={handleSave} className="space-y-6">
               {/* Visibility Card */}
-              <div className="group rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+              <div className={`group rounded-3xl border p-6 transition-all hover:shadow-md ${
+                isDark ? 'border-zinc-800 bg-zinc-900/40' : 'border-zinc-200 bg-white shadow-sm'
+              }`}>
                 <h2 className="mb-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">
-                  <Eye /> Status
+                  <Eye size={12} /> Status
                 </h2>
-                <label className="flex cursor-pointer items-center justify-between rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-950/50">
+                <label className={`flex cursor-pointer items-center justify-between rounded-2xl p-4 ${
+                    isDark ? 'bg-zinc-950/50' : 'bg-zinc-50'
+                }`}>
                   <div className="space-y-0.5">
-                    <span className="block text-sm font-bold text-zinc-800 dark:text-zinc-200">Active Mode</span>
+                    <span className={`block text-sm font-bold ${isDark ? 'text-zinc-200' : 'text-zinc-800'}`}>Active Mode</span>
                     <span className="block text-[11px] text-zinc-500">Toggle the visibility of the widget site-wide</span>
                   </div>
                   <input
@@ -221,9 +225,11 @@ export default function AdminChatbotSettings() {
               </div>
 
               {/* Branding Card */}
-              <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+              <div className={`rounded-3xl border p-6 transition-all ${
+                isDark ? 'border-zinc-800 bg-zinc-900/40' : 'border-zinc-200 bg-white shadow-sm'
+              }`}>
                 <h2 className="mb-6 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">
-                  <MessageCircle /> Visual Branding
+                  <MessageCircle size={12} /> Visual Branding
                 </h2>
                 <div className="space-y-6">
                   <div>
@@ -246,7 +252,7 @@ export default function AdminChatbotSettings() {
                           onClick={() => setForm((f) => ({ ...f, chatbotIcon: av.value }))}
                           className={`relative group flex flex-col items-center gap-1.5 rounded-2xl border-2 p-3 transition-all duration-200 hover:scale-105 ${form.chatbotIcon === av.value
                             ? 'border-indigo-500 bg-indigo-50 shadow-lg shadow-indigo-500/20 dark:bg-indigo-950/30'
-                            : 'border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900'
+                            : isDark ? 'border-zinc-700 bg-zinc-950/20 hover:border-zinc-500' : 'border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-md'
                             }`}
                         >
                           <img src={av.value} alt={av.label} className="h-12 w-12 rounded-full object-cover shadow-sm" />
@@ -315,9 +321,11 @@ export default function AdminChatbotSettings() {
               </div>
 
               {/* Copy/Messages Card */}
-              <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+              <div className={`rounded-3xl border p-6 transition-all ${
+                isDark ? 'border-zinc-800 bg-zinc-900/40' : 'border-zinc-200 bg-white shadow-sm'
+              }`}>
                 <h2 className="mb-6 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">
-                  <Type /> Conversation Copy
+                  <Type size={12} /> Conversation Copy
                 </h2>
                 <div className="space-y-5">
                   <div>
@@ -341,9 +349,11 @@ export default function AdminChatbotSettings() {
               </div>
 
               {/* Layout Card */}
-              <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+              <div className={`rounded-3xl border p-6 transition-all ${
+                isDark ? 'border-zinc-800 bg-zinc-900/40' : 'border-zinc-200 bg-white shadow-sm'
+              }`}>
                 <h2 className="mb-6 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">
-                  <Layout /> Dimensions &amp; position
+                  <Layout size={12} /> Dimensions &amp; position
                 </h2>
                 <div className="mb-6 space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">

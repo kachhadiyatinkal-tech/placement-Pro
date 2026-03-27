@@ -19,8 +19,7 @@ export default function Navbar() {
         <button
           type="button"
           onClick={toggle}
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-all active:scale-95 lg:hidden ${isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-400' : 'border-zinc-200 bg-white text-zinc-600 shadow-sm'
-            }`}
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-app bg-surface text-muted transition-all active:scale-95 lg:hidden shadow-sm`}
           aria-label="Toggle navigation"
         >
           <Menu className="text-lg" />
@@ -31,12 +30,12 @@ export default function Navbar() {
             <User size={16} />
           </div>
           <div className="min-w-0">
-            <h1 className="truncate text-sm font-bold tracking-tight text-zinc-900 dark:text-white">
+            <h1 className="truncate text-sm font-black tracking-tight text-app">
               Placement<span className="text-brand-500">Suite</span>
             </h1>
             <div className="flex items-center gap-1.5">
               <span className="h-1 w-1 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-              <p className="truncate text-[9px] font-bold uppercase tracking-widest text-zinc-500/80">
+              <p className="truncate text-[9px] font-bold uppercase tracking-widest text-muted opacity-80">
                 {role ? role : 'Guest'}
               </p>
             </div>
@@ -46,7 +45,7 @@ export default function Navbar() {
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-4">
         <ThemeToggle />
-        <div className="hidden h-6 w-px bg-zinc-200 dark:bg-zinc-800 sm:block" />
+        <div className="hidden h-6 w-px border-l border-app sm:block" />
         <button
           type="button"
           onClick={() => {
@@ -54,10 +53,7 @@ export default function Navbar() {
             dispatch(logout())
             navigate('/')
           }}
-          className={`group flex items-center gap-2 rounded-xl px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 ${isDark
-              ? 'bg-zinc-900 text-zinc-400 hover:text-red-400 border border-zinc-800'
-              : 'bg-white text-zinc-600 shadow-sm border border-zinc-200 hover:text-red-600'
-            }`}
+          className={`group flex items-center gap-2 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-app bg-surface-soft/50 text-muted hover:text-red-500 hover:border-red-500/30`}
         >
           <LogOut className="text-sm" />
           <span className="hidden sm:inline">Sign Out</span>

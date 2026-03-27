@@ -3,7 +3,7 @@
 @theme {
   --font-sans: "Inter", "Outfit", ui-sans-serif, system-ui, sans-serif;
   
-  /* Brand Colors */
+  /* Brand Colors - Sophisticated Indigo/Violet */
   --color-brand-50: #f5f3ff;
   --color-brand-100: #ede9fe;
   --color-brand-200: #ddd6fe;
@@ -37,6 +37,28 @@
   }
 }
 
+:root {
+  /* Systematic Theme Variables - Light */
+  --app-bg: #fdfdfd;
+  --app-surface: #ffffff;
+  --app-surface-soft: #f4f4f5;
+  --app-text: #09090b;
+  --app-text-muted: #71717a;
+  --app-border: #e4e4e7;
+  --app-ring: rgba(139, 92, 246, 0.2);
+}
+
+.dark {
+  /* Systematic Theme Variables - Dark */
+  --app-bg: #030303;
+  --app-surface: #09090b;
+  --app-surface-soft: #18181b;
+  --app-text: #fafafa;
+  --app-text-muted: #a1a1aa;
+  --app-border: #27272a;
+  --app-ring: rgba(139, 92, 246, 0.1);
+}
+
 @layer base {
   html {
     @apply scroll-smooth;
@@ -44,8 +66,9 @@
   }
 
   body {
-    @apply min-h-dvh bg-zinc-50 text-zinc-900 antialiased selection:bg-brand-500/20;
-    @apply dark:bg-[#030303] dark:text-zinc-100;
+    @apply min-h-dvh antialiased selection:bg-brand-500/20 transition-colors duration-300;
+    background-color: var(--app-bg);
+    color: var(--app-text);
   }
 
   h1 { @apply text-2xl font-bold tracking-tight sm:text-3xl; }
@@ -55,6 +78,19 @@
   /* Focus States */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+
+  /* Custom Scrollbar for Premium Feel */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-zinc-300/50 rounded-full hover:bg-zinc-400/50 transition-colors;
+    @apply dark:bg-zinc-800/50 dark:hover:bg-zinc-700/50;
   }
 }
 
@@ -80,8 +116,9 @@
   }
 
   .glass-card {
-    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-sm;
-    @apply dark:bg-zinc-900/40 dark:border-zinc-800/50 dark:shadow-none;
+    @apply backdrop-blur-md border shadow-sm transition-all duration-300;
+    background-color: color-mix(in srgb, var(--app-surface), transparent 30%);
+    border-color: var(--app-border);
   }
   
   .premium-gradient {
@@ -92,5 +129,13 @@
     @apply bg-clip-text text-transparent bg-gradient-to-r from-zinc-900 to-zinc-500;
     @apply dark:from-white dark:to-zinc-500;
   }
+
+  /* Theme-aware utilities */
+  .bg-app { background-color: var(--app-bg); }
+  .bg-surface { background-color: var(--app-surface); }
+  .bg-surface-soft { background-color: var(--app-surface-soft); }
+  .text-app { color: var(--app-text); }
+  .text-muted { color: var(--app-text-muted); }
+  .border-app { border-color: var(--app-border); }
 }
 
