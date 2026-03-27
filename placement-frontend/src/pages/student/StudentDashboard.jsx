@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { uploadResume } from '../../features/students/studentSlice'
-import { fetchJobs, fetchMyApplications } from '../../features/jobs/jobSlice'
+import { fetchJobs } from '../../features/jobs/jobSlice'
+import { fetchStudentApplications } from '../../features/applications/applicationSlice'
 import { fetchNoticesByRole } from '../../features/notices/noticesSlice'
 import { Briefcase, FileText, Bell, UploadCloud, CheckCircle, Zap, ArrowRight, BarChart2 } from 'lucide-react'
 
@@ -28,7 +29,8 @@ function StatCard({ label, value, icon, color }) {
 
 export default function StudentDashboard() {
   const dispatch = useDispatch()
-  const { myApplications, jobs } = useSelector((s) => s.jobs)
+  const { jobs } = useSelector((s) => s.jobs)
+  const { applications } = useSelector((s) => s.applications)
   const { status } = useSelector((s) => s.students)
   const noticeCount = useSelector((s) => s.notices.notices?.length || 0)
   const user = useSelector((s) => s.auth.user)
@@ -46,7 +48,7 @@ export default function StudentDashboard() {
   useEffect(() => {
     dispatch(fetchJobs())
     dispatch(fetchNoticesByRole('student'))
-    if (studentId) dispatch(fetchMyApplications(studentId))
+    if (studentId) dispatch(fetchStudentApplications())
   }, [dispatch, studentId])
 
   return (
@@ -75,7 +77,7 @@ export default function StudentDashboard() {
         />
         <StatCard
           label="Active Pipeline"
-          value={myApplications?.length ?? 0}
+          value={applications?.length ?? 0}
           icon={<FileText />}
           color="text-amber-500"
         />

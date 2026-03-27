@@ -8,6 +8,8 @@ import companyReducer from '../features/company/companySlice'
 import managementReducer from '../features/management/managementSlice'
 import companiesReducer from '../features/companies/companiesSlice'
 import noticesReducer from '../features/notices/noticesSlice'
+import analyticsReducer from '../features/analytics/analyticsSlice'
+import applicationsReducer from '../features/applications/applicationSlice'
 
 export const store = configureStore({
   reducer: {
@@ -19,6 +21,7 @@ export const store = configureStore({
     management: managementReducer,
     companies: companiesReducer,
     notices: noticesReducer,
+    analytics: analyticsReducer,
+    applications: applicationsReducer,
   },
 })
-

@@ -4,10 +4,11 @@ const User = require('../models/user.model');
 const Job = require('../models/job.model');
 
 const MANAGER_ROLES = ['tpo', 'company'];
-const UPDATABLE_STATUSES = ['shortlisted', 'interview', 'selected', 'rejected'];
+const UPDATABLE_STATUSES = ['under_review', 'shortlisted', 'interview', 'selected', 'rejected'];
 
 const allowedTransitions = {
-  applied: ['shortlisted', 'interview', 'selected', 'rejected'],
+  applied: ['under_review', 'shortlisted', 'interview', 'selected', 'rejected'],
+  under_review: ['shortlisted', 'interview', 'selected', 'rejected'],
   shortlisted: ['interview', 'selected', 'rejected'],
   interview: ['selected', 'rejected'],
   selected: [],
@@ -72,6 +73,7 @@ const applyToJob = async (req, res) => {
     const application = await Application.create({
       studentId,
       jobId,
+      companyId: job.company,
       status: 'applied',
       resume: resume || undefined,
     });
@@ -213,9 +215,113 @@ const updateApplicationStatus = async (req, res) => {
   }
 };
 
+const scheduleInterview = async (req, res) => {
+  try {
+    if (!canManageApplications(req?.user?.role)) {
+      return res.status(403).json({ msg: 'Only TPO or company can schedule interviews.' });
+    }
+
+    const { id } = req.params;
+    const { interviewDate, interviewLink } = req.body || {};
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ msg: 'Invalid application id.' });
+    }
+
+    const application = await Application.findById(id);
+    if (!application) {
+      return res.status(404).json({ msg: 'Application not found.' });
+    }
+
+    application.status = 'interview';
+    application.interviewDate = interviewDate;
+    application.interviewLink = interviewLink;
+
+    await application.save();
+    
+    // Sync legacy array status
+    await syncLegacyStatus({
+      studentId: application.studentId,
+      jobId: application.jobId,
+      status: application.status,
+    });
+
+    return res.status(200).json({ msg: 'Interview scheduled successfully.', data: application });
+  } catch (error) {
+    console.log('applicationController.scheduleInterview => ', error);
+    return res.status(500).json({ msg: 'Internal Server Error!' });
+  }
+};
+
+const uploadOfferLetterEndpoint = async (req, res) => {
+  try {
+    if (!canManageApplications(req?.user?.role)) {
+      return res.status(403).json({ msg: 'Only TPO or company can upload offer letters.' });
+    }
+
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ msg: 'Invalid application id.' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ msg: 'No file uploaded.' });
+    }
+
+    const application = await Application.findById(id);
+    if (!application) {
+      return res.status(404).json({ msg: 'Application not found.' });
+    }
+
+    // Set offer letter URL
+    const fileUrl = `${process.env.BACKEND_URL || 'http://localhost:'+process.env.PORT}/offerLetter/${req.file.filename}`;
+    application.offerLetter = fileUrl;
+
+    await application.save();
+
+    return res.status(200).json({ msg: 'Offer letter uploaded successfully.', data: application });
+  } catch (error) {
+    console.log('applicationController.uploadOfferLetterEndpoint => ', error);
+    return res.status(500).json({ msg: 'Internal Server Error!' });
+  }
+};
+
+const respondToOffer = async (req, res) => {
+  try {
+    if (!canApply(req?.user?.role)) {
+      return res.status(403).json({ msg: 'Only students can respond to offers.' });
+    }
+
+    const { id } = req.params;
+    const { isAccepted } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ msg: 'Invalid application id.' });
+    }
+
+    const application = await Application.findOne({ _id: id, studentId: req.user._id });
+    if (!application) {
+      return res.status(404).json({ msg: 'Application not found.' });
+    }
+
+    application.isAccepted = isAccepted;
+
+    await application.save();
+
+    return res.status(200).json({ msg: 'Offer response recorded successfully.', data: application });
+  } catch (error) {
+    console.log('applicationController.respondToOffer => ', error);
+    return res.status(500).json({ msg: 'Internal Server Error!' });
+  }
+};
+
 module.exports = {
   applyToJob,
   getStudentApplications,
   getJobApplicants,
   updateApplicationStatus,
+  scheduleInterview,
+  uploadOfferLetterEndpoint,
+  respondToOffer,
 };

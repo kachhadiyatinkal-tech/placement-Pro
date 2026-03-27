@@ -1,6 +1,11 @@
-import { useSelector } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { Briefcase, Users, Layers, Bell, Clipboard, UserPlus, ChevronRight, Shield, MessageCircle, Mail } from 'lucide-react'
+import { Briefcase, Users, Layers, Bell, Clipboard, UserPlus, ChevronRight, Shield, MessageCircle, Mail, GraduationCap, Building, BarChart2, PieChart as PieChartIcon } from 'lucide-react'
+
+import StatCard from '../../components/dashboard/StatCard'
+import Charts from '../../components/dashboard/Charts'
+import { fetchOverview, fetchTrends, fetchCompanyStats, fetchBranchStats } from '../../features/analytics/analyticsSlice'
 
 function Card({ to, icon: Icon, label, desc, color }) {
   return (
@@ -24,16 +29,25 @@ function Card({ to, icon: Icon, label, desc, color }) {
         Manage <ChevronRight />
       </div>
 
-      {/* Subtle Background Glow on Hover */}
       <div className="absolute -bottom-10 -right-10 h-32 w-32 rounded-full bg-indigo-500/5 blur-3xl transition-opacity opacity-0 group-hover:opacity-100" />
     </Link>
   )
 }
 
 export default function AdminDashboard() {
+  const dispatch = useDispatch()
   const role = useSelector((s) => s.auth.role) || localStorage.getItem('role')
   const mode = useSelector((s) => s.theme?.mode)
   const isDark = mode === 'dark'
+
+  const { overview, trends, companyStats, branchStats, loading } = useSelector((s) => s.analytics)
+
+  useEffect(() => {
+    dispatch(fetchOverview())
+    dispatch(fetchTrends())
+    dispatch(fetchCompanyStats())
+    dispatch(fetchBranchStats())
+  }, [dispatch])
 
   return (
     <div className="mx-auto max-w-7xl space-y-10 py-4">
@@ -44,7 +58,7 @@ export default function AdminDashboard() {
             <Shield size={12} /> {role === 'admin' ? 'System Administrator' : 'Management Unit'}
           </div>
           <h1 className="text-4xl font-black tracking-tighter uppercase leading-none text-zinc-900 dark:text-zinc-50">
-            Console
+            Placement Analytics Console
           </h1>
           <p className="max-w-md text-sm font-bold text-zinc-500 uppercase tracking-widest opacity-80">
             Orchestrate student placement workflows and partner ecosystem.
@@ -56,56 +70,34 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Main Grid */}
+      {/* Analytics Overview Cards */}
+      {overview && (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:col-span-12">
+          <StatCard title="Total Students" value={overview.totalStudents} icon={Users} />
+          <StatCard title="Placed Students" value={overview.totalPlacedStudents} icon={GraduationCap} />
+          <StatCard title="Total Companies" value={overview.totalCompanies} icon={Building} />
+          <StatCard title="Placement %" value={overview.placementPercentage} icon={PieChartIcon} isPercentage />
+        </div>
+      )}
+
+      {/* Analytics Charts */}
+      {!loading && (
+        <Charts trends={trends} companyStats={companyStats} branchStats={branchStats} />
+      )}
+
+      <hr className="border-t-2 border-dashed border-zinc-200 dark:border-zinc-800" />
+
+      {/* Main Nav Grid */}
+      <h2 className="text-lg font-black tracking-widest uppercase text-stone-500 dark:text-stone-400">System Core & Navigation</h2>
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-        <Card
-          to="/admin/companies"
-          icon={Briefcase}
-          label="Partner Registry"
-          desc="Onboard new corporate partners and manage interview difficulty levels."
-        />
-        <Card
-          to="/admin/tpo"
-          icon={Users}
-          label="Officer Accounts"
-          desc="Audit and manage TPO credentials and platform permissions."
-        />
-        <Card
-          to="/admin/students"
-          icon={Clipboard}
-          label="Talent Pool"
-          desc="Access comprehensive student databases and export academic records."
-        />
-        <Card
-          to="/admin/add-user"
-          icon={UserPlus}
-          label="Identity Access"
-          desc="Provision new user accounts across all organizational tiers."
-        />
-        <Card
-          to="/admin/notices"
-          icon={Bell}
-          label="Bulletin System"
-          desc="Broadcast critical placement updates and manage global notifications."
-        />
-        <Card
-          to="/admin/applications"
-          icon={Briefcase}
-          label="Pipeline Audit"
-          desc="Review active job applications and download applicant metrics."
-        />
-        <Card
-          to="/admin/chatbot-settings"
-          icon={MessageCircle}
-          label="Chatbot UI"
-          desc="Customize the floating assistant: visibility, branding, layout, and copy."
-        />
-        <Card
-          to="/admin/contact-page"
-          icon={Mail}
-          label="Contact page"
-          desc="Edit public contact details, hours, and sidebar copy shown on /contact."
-        />
+        <Card to="/admin/companies" icon={Briefcase} label="Partner Registry" desc="Onboard new corporate partners and manage interview difficulty levels." />
+        <Card to="/admin/tpo" icon={Users} label="Officer Accounts" desc="Audit and manage TPO credentials and platform permissions." />
+        <Card to="/admin/students" icon={Clipboard} label="Talent Pool" desc="Access comprehensive student databases and export academic records." />
+        <Card to="/admin/add-user" icon={UserPlus} label="Identity Access" desc="Provision new user accounts across all organizational tiers." />
+        <Card to="/admin/notices" icon={Bell} label="Bulletin System" desc="Broadcast critical placement updates and manage global notifications." />
+        <Card to="/admin/applications" icon={Briefcase} label="Pipeline Audit" desc="Review active job applications and download applicant metrics." />
+        <Card to="/admin/chatbot-settings" icon={MessageCircle} label="Chatbot UI" desc="Customize the floating assistant: visibility, branding, layout, and copy." />
+        <Card to="/admin/contact-page" icon={Mail} label="Contact page" desc="Edit public contact details, hours, and sidebar copy shown on /contact." />
       </div>
 
       {/* Footer Stats / Quick Info */}

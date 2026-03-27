@@ -4,13 +4,15 @@ import JobCard from '../../components/JobCard'
 import Loader from '../../components/Loader'
 import JobDetailModal from '../../components/JobDetailModal'
 import ApplyFormModal from '../../components/ApplyFormModal'
-import { applyToJob, fetchJobs, fetchMyApplications } from '../../features/jobs/jobSlice'
+import { fetchJobs } from '../../features/jobs/jobSlice'
+import { applyJob as submitApplication, fetchStudentApplications } from '../../features/applications/applicationSlice'
 import { Search, Zap, Target } from 'lucide-react'
 import { isJobAcceptingApplications, formatDeadlineLabel } from '../../utils/jobDeadline'
 
 export default function Jobs() {
   const dispatch = useDispatch()
-  const { jobs, myApplications, status } = useSelector((s) => s.jobs)
+  const { jobs, status } = useSelector((s) => s.jobs)
+  const { applications } = useSelector((s) => s.applications)
   const user = useSelector((s) => s.auth.user)
   const isDark = useSelector((s) => s.theme?.isDark ?? true)
 
@@ -26,7 +28,7 @@ export default function Jobs() {
 
   useEffect(() => {
     if (String(user?.role || '').toLowerCase() === 'student') {
-      dispatch(fetchMyApplications())
+      dispatch(fetchStudentApplications())
     }
   }, [dispatch, user])
 
@@ -45,11 +47,11 @@ export default function Jobs() {
   const appliedJobIds = useMemo(
     () =>
       new Set(
-        (myApplications || [])
+        (applications || [])
           .map((app) => app?.jobId?._id || app?.jobId || app?.job?._id || app?.job || app?.jobRef)
           .filter(Boolean),
       ),
-    [myApplications],
+    [applications],
   )
 
   function onApplyClick(job) {
@@ -72,18 +74,13 @@ export default function Jobs() {
     if (!jobId) return
 
     setApplyingId(jobId)
-    const res = await dispatch(
-      applyToJob({
-        jobId,
-        ...application,
-      }),
-    )
+    const res = await dispatch(submitApplication(jobId))
     setApplyingId(null)
     if (res.meta.requestStatus === 'fulfilled') {
       setApplyJob(null)
       setApplyErrors({})
       dispatch(fetchJobs())
-      dispatch(fetchMyApplications())
+      dispatch(fetchStudentApplications())
     } else {
       setApplyErrors(res?.payload?.errors || {})
     }

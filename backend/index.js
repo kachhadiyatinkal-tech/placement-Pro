@@ -41,6 +41,8 @@ app.use('/api/contact', require('./routes/contactPageRoutes'));
 app.use('/api/test', require('./routes/practiceTest.route'));
 // job applications tracking APIs
 app.use('/api/applications', require('./routes/applicationRoutes'));
+// Analytics
+app.use('/api/analytics', require('./routes/analytics.route'));
 // Same chat handler at POST /chat (simple API contract)
 const { postChat } = require('./controllers/chatbotChat.controller');
 app.post('/chat', postChat);

@@ -3,7 +3,10 @@ const ChatLog = require('../models/ChatLog');
 const ChatbotSettings = require('../models/chatbotSettings.model');
 const authenticateToken = require('../middleware/auth.middleware');
 const requireAdminOrManagement = require('../middleware/adminOrManagement.middleware');
-const { postChat } = require('../controllers/chatbotChat.controller');
+const { postChat, analyzeResume } = require('../controllers/chatbotChat.controller');
+const optionalAuthToken = require('../middleware/optionalAuth.middleware');
+const multer = require('multer');
+const upload = multer({ limits: { fileSize: 5 * 1024 * 1024 } });
 
 const router = express.Router();
 
@@ -135,6 +138,7 @@ router.put('/settings', authenticateToken, requireAdminOrManagement, async (req,
  *
  * Rule-based intents run first; otherwise Google Gemini with function calling.
  */
-router.post('/chat', postChat);
+router.post('/chat', optionalAuthToken, postChat);
+router.post('/resume', optionalAuthToken, upload.single('resume'), analyzeResume);
 
 module.exports = router;

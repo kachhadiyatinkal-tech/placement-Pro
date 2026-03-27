@@ -14,11 +14,19 @@ const applicationSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+    },
     status: {
       type: String,
-      enum: ['applied', 'shortlisted', 'interview', 'selected', 'rejected'],
+      enum: ['applied', 'under_review', 'shortlisted', 'interview', 'selected', 'rejected'],
       default: 'applied',
     },
+    interviewDate: { type: Date },
+    interviewLink: { type: String, trim: true },
+    offerLetter: { type: String, trim: true },
+    isAccepted: { type: Boolean, default: null },
     interviewDetails: {
       date: { type: Date },
       time: { type: String, trim: true },

@@ -1,11 +1,16 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchJobs, deleteJob, postJob, updateJob } from '../../features/jobs/jobSlice'
 import JobCard from '../../components/JobCard'
 import Loader from '../../components/Loader'
 import { fetchCompanies } from '../../features/companies/companiesSlice'
 import JobFormModal from '../../components/JobFormModal'
-import { Plus, Edit3, TrendingUp, Users, Briefcase } from 'lucide-react'
+import { Plus, Edit3, TrendingUp, Users, Briefcase, GraduationCap, Building, PieChartIcon } from 'lucide-react'
+
+// Analytics
+import StatCard from '../../components/dashboard/StatCard'
+import Charts from '../../components/dashboard/Charts'
+import { fetchOverview, fetchTrends, fetchCompanyStats, fetchBranchStats } from '../../features/analytics/analyticsSlice'
 
 function Card({ label, value, icon: Icon }) {
   const mode = useSelector((s) => s.theme.mode)
@@ -44,13 +49,19 @@ export default function TpoDashboard() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingJob, setEditingJob] = useState(null)
 
+  const { overview, trends, companyStats, branchStats, loading: analyticsLoading } = useSelector((s) => s.analytics)
+
   useEffect(() => {
     dispatch(fetchJobs())
     dispatch(fetchCompanies())
+    dispatch(fetchOverview())
+    dispatch(fetchTrends())
+    dispatch(fetchCompanyStats())
+    dispatch(fetchBranchStats())
   }, [dispatch])
 
   const totalApplicants = jobs?.reduce((acc, j) => acc + (j?.applicants?.length || 0), 0) ?? 0
-  const isLoading = status === 'loading'
+  const isLoading = status === 'loading' || analyticsLoading
 
   async function handleDelete(job) {
     const id = job?._id || job?.id
@@ -115,14 +126,24 @@ export default function TpoDashboard() {
         </button>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <Card label="Live Vacancies" value={jobs?.length ?? 0} icon={Briefcase} />
-        <Card label="Total Applicants" value={totalApplicants} icon={Users} />
-        <Card label="Growth Index" value="+12%" icon={TrendingUp} />
-      </div>
+      {/* Analytics Overview Cards */}
+      {overview && (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:col-span-12">
+          <StatCard title="Total Students" value={overview.totalStudents} icon={Users} />
+          <StatCard title="Placed Students" value={overview.totalPlacedStudents} icon={GraduationCap} />
+          <StatCard title="Total Companies" value={overview.totalCompanies} icon={Building} />
+          <StatCard title="Placement %" value={overview.placementPercentage} icon={PieChartIcon} isPercentage />
+        </div>
+      )}
 
-      {/* Main Content Area */}
+      {/* Analytics Charts */}
+      {!analyticsLoading && (
+        <Charts trends={trends} companyStats={companyStats} branchStats={branchStats} />
+      )}
+
+      <hr className="border-t-2 border-dashed border-zinc-200 dark:border-zinc-800" />
+
+      {/* Active Jobs Heading */}
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <h2 className="text-sm font-black uppercase tracking-[0.2em] text-zinc-400">

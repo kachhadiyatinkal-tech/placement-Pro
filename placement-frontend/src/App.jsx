@@ -4,7 +4,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 
 import AppLoader from './components/AppLoader'
-import Chatbot from './components/Chatbot'
+import Chatbot from './components/chatbot/Chatbot'
 import ProtectedRoute from './components/ProtectedRoute'
 import SidebarLayout from './components/SidebarLayout'
 
