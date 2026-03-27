@@ -1,0 +1,209 @@
+{
+  "users": [
+    {
+      "_id": "671111111111111111111111",
+      "first_name": "Test",
+      "middle_name": "",
+      "last_name": "Student",
+      "gender": "Male",
+      "email": "student@example.com",
+      "number": 9876543210,
+      "password": "$2b$10$FFCdIRgqBjw8hgP/YZHcNu.ybx.Qi3r7G/oeX80XO05q0mhw0Ng3W",
+      "role": "student",
+      "profile": "/profileImgs/default/defaultProfileImg.jpg",
+      "fullAddress": {
+        "address": "Student Street 1",
+        "pincode": 411001
+      },
+      "dateOfBirth": "2003-01-01T00:00:00.000Z",
+      "createdAt": "2024-01-01T10:00:00.000Z",
+      "token": "",
+      "isProfileCompleted": false,
+      "studentProfile": {
+        "isApproved": false,
+        "rollNumber": 12345,
+        "resume": {
+          "filename": "",
+          "filepath": "",
+          "contentType": ""
+        },
+        "UIN": "STU001",
+        "department": "Computer",
+        "year": 4,
+        "addmissionYear": 2021,
+        "gap": false,
+        "liveKT": 0,
+        "SGPA": {
+          "sem1": 8.1,
+          "sem2": 8.3,
+          "sem3": 8.5,
+          "sem4": 8.7,
+          "sem5": 8.6,
+          "sem6": 8.8,
+          "sem7": 0,
+          "sem8": 0
+        },
+        "pastQualification": {
+          "ssc": {
+            "board": "State Board",
+            "percentage": 85,
+            "year": 2019
+          },
+          "hsc": {
+            "board": "State Board",
+            "percentage": 82,
+            "year": 2021
+          },
+          "diploma": {
+            "department": "",
+            "percentage": 0,
+            "year": 0
+          }
+        },
+        "appliedJobs": [],
+        "internships": []
+      },
+      "tpoProfile": {
+        "position": ""
+      },
+      "managementProfile": {
+        "position": ""
+      }
+    },
+    {
+      "_id": "671222222222222222222222",
+      "first_name": "TPO",
+      "last_name": "Admin",
+      "gender": "Male",
+      "email": "tpo@example.com",
+      "number": 9988776655,
+      "password": "$2b$10$FFCdIRgqBjw8hgP/YZHcNu.ybx.Qi3r7G/oeX80XO05q0mhw0Ng3W",
+      "role": "tpo",
+      "profile": "/profileImgs/default/defaultProfileImg.jpg",
+      "fullAddress": {
+        "address": "TPO Office",
+        "pincode": 411002
+      },
+      "dateOfBirth": "1990-01-01T00:00:00.000Z",
+      "createdAt": "2024-01-01T10:00:00.000Z",
+      "token": "",
+      "isProfileCompleted": true,
+      "studentProfile": null,
+      "tpoProfile": {
+        "position": "Training & Placement Officer"
+      },
+      "managementProfile": null
+    },
+    {
+      "_id": "671333333333333333333333",
+      "first_name": "Management",
+      "last_name": "Admin",
+      "gender": "Female",
+      "email": "management@example.com",
+      "number": 9876501234,
+      "password": "$2b$10$FFCdIRgqBjw8hgP/YZHcNu.ybx.Qi3r7G/oeX80XO05q0mhw0Ng3W",
+      "role": "management_admin",
+      "profile": "/profileImgs/default/defaultProfileImg.jpg",
+      "fullAddress": {
+        "address": "Management Block",
+        "pincode": 411003
+      },
+      "dateOfBirth": "1988-05-15T00:00:00.000Z",
+      "createdAt": "2024-01-01T10:00:00.000Z",
+      "token": "",
+      "isProfileCompleted": true,
+      "studentProfile": null,
+      "tpoProfile": null,
+      "managementProfile": {
+        "position": "Dean Academics"
+      }
+    },
+    {
+      "_id": "671444444444444444444444",
+      "first_name": "Super",
+      "last_name": "Admin",
+      "gender": "Male",
+      "email": "admin@example.com",
+      "number": 9000000000,
+      "password": "$2b$10$FFCdIRgqBjw8hgP/YZHcNu.ybx.Qi3r7G/oeX80XO05q0mhw0Ng3W",
+      "role": "superuser",
+      "profile": "/profileImgs/default/defaultProfileImg.jpg",
+      "fullAddress": {
+        "address": "Main Office",
+        "pincode": 411004
+      },
+      "dateOfBirth": "1985-02-02T00:00:00.000Z",
+      "createdAt": "2024-01-01T10:00:00.000Z",
+      "token": "",
+      "isProfileCompleted": true,
+      "studentProfile": null,
+      "tpoProfile": null,
+      "managementProfile": null
+    }
+  ],
+  "companys": [
+    {
+      "_id": "672111111111111111111111",
+      "companyName": "Acme Technologies",
+      "companyDescription": "Product-based software company focusing on web and cloud solutions.",
+      "companyWebsite": "https://acme.example.com",
+      "companyLocation": "Pune, India",
+      "companyDifficulty": "Moderate"
+    },
+    {
+      "_id": "672222222222222222222222",
+      "companyName": "InnoSoft Labs",
+      "companyDescription": "Startup working on AI and data products.",
+      "companyWebsite": "https://innosoft.example.com",
+      "companyLocation": "Bengaluru, India",
+      "companyDifficulty": "Hard"
+    }
+  ],
+  "jobs": [
+    {
+      "_id": "673111111111111111111111",
+      "jobTitle": "React JS Developer",
+      "jobDescription": "Work on building modern web applications using React, Redux and REST APIs.",
+      "eligibility": "B.E/B.Tech Computer, minimum 7.0 CGPA, no active backlogs.",
+      "salary": 800000,
+      "howToApply": "Apply via college portal and upload updated resume.",
+      "postedAt": "2024-01-10T09:00:00.000Z",
+      "applicationDeadline": "2024-01-25T23:59:59.000Z",
+      "company": "672111111111111111111111",
+      "applicants": [
+        {
+          "studentId": "671111111111111111111111",
+          "currentRound": "Aptitude Test",
+          "roundStatus": "pending",
+          "selectionDate": null,
+          "joiningDate": null,
+          "offerLetter": "",
+          "status": "applied",
+          "appliedAt": "2024-01-12T12:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "_id": "673222222222222222222222",
+      "jobTitle": "Backend Node.js Engineer",
+      "jobDescription": "Design and develop REST APIs using Node.js, Express and MongoDB.",
+      "eligibility": "B.E/B.Tech Computer/IT, good knowledge of JS and databases.",
+      "salary": 900000,
+      "howToApply": "Through TPO after coding round.",
+      "postedAt": "2024-02-01T09:00:00.000Z",
+      "applicationDeadline": "2024-02-20T23:59:59.000Z",
+      "company": "672222222222222222222222",
+      "applicants": []
+    }
+  ],
+  "notices": [
+    {
+      "_id": "674111111111111111111111",
+      "title": "Pre‑placement talk – Acme Technologies",
+      "description": "Pre‑placement talk for Acme Technologies will be held in Seminar Hall A.",
+      "date": "2024-01-15T10:00:00.000Z",
+      "sender": "671222222222222222222222"
+    }
+  ]
+}
+

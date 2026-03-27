@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Outfit", ui-sans-serif, system-ui, sans-serif;
+  
+  /* Brand Colors */
+  --color-brand-50: #f5f3ff;
+  --color-brand-100: #ede9fe;
+  --color-brand-200: #ddd6fe;
+  --color-brand-300: #c4b5fd;
+  --color-brand-400: #a78bfa;
+  --color-brand-500: #8b5cf6;
+  --color-brand-600: #7c3aed;
+  --color-brand-700: #6d28d9;
+  --color-brand-800: #5b21b6;
+  --color-brand-900: #4c1d95;
+  --color-brand-950: #2e1065;
+
+  /* Surface Colors - Light (Gray/Zinc based) */
+  --color-surf-light-50: #fafafa;
+  --color-surf-light-100: #f4f4f5;
+  --color-surf-light-200: #e4e4e7;
+  
+  /* Surface Colors - Dark (Wow/Premium) */
+  --color-surf-dark-900: #09090b;
+  --color-surf-dark-950: #030303;
+}
+
+@keyframes modal-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+    font-size: 15px; /* Slightly smaller base for better density */
+  }
+
+  body {
+    @apply min-h-dvh bg-zinc-50 text-zinc-900 antialiased selection:bg-brand-500/20;
+    @apply dark:bg-[#030303] dark:text-zinc-100;
+  }
+
+  h1 { @apply text-2xl font-bold tracking-tight sm:text-3xl; }
+  h2 { @apply text-xl font-bold tracking-tight sm:text-2xl; }
+  h3 { @apply text-lg font-semibold tracking-tight; }
+  
+  /* Focus States */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+}
+
+/* Custom Utilities for "Wow" effect */
+@layer utilities {
+  .ds-page {
+    @apply p-6;
+  }
+  .ds-section {
+    @apply grid gap-4;
+  }
+  .ds-page-title {
+    @apply text-2xl font-semibold;
+  }
+  .ds-section-title {
+    @apply text-xl font-medium;
+  }
+  .ds-label {
+    @apply text-sm text-gray-400;
+  }
+  .ds-content {
+    @apply text-base;
+  }
+
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-sm;
+    @apply dark:bg-zinc-900/40 dark:border-zinc-800/50 dark:shadow-none;
+  }
+  
+  .premium-gradient {
+    @apply bg-gradient-to-br from-brand-500 to-indigo-600 text-white shadow-lg shadow-brand-500/20;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-zinc-900 to-zinc-500;
+    @apply dark:from-white dark:to-zinc-500;
+  }
+}
+

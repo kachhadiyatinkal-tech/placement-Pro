@@ -1,0 +1,25 @@
+/** Placement Suite Logo - gradient badge with P */
+export default function Logo({ className = 'h-10 w-10', spin = false }) {
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`${className} ${spin ? 'animate-spin' : ''}`}
+      style={spin ? { animationDuration: '1.2s' } : undefined}
+    >
+      <defs>
+        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#6366f1" />
+          <stop offset="100%" stopColor="#8b5cf6" />
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="14" fill="url(#logoGrad)" />
+      <path
+        d="M22 18h10c5.5 0 10 4.5 10 10s-4.5 10-10 10h-6V38h-4V18zm4 4v12h6c3.3 0 6-2.7 6-6s-2.7-6-6-6h-6z"
+        fill="white"
+        fillOpacity="0.95"
+      />
+    </svg>
+  )
+}

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="gg" x1="16" y1="12" x2="80" y2="88" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7c3aed"/>
+      <stop offset="0.5" stop-color="#a855f7"/>
+      <stop offset="1" stop-color="#c084fc"/>
+    </linearGradient>
+  </defs>
+  <circle cx="48" cy="48" r="44" fill="url(#gg)"/>
+  <circle cx="48" cy="48" r="44" stroke="#fff" stroke-opacity="0.18" stroke-width="1.5"/>
+  <!-- Cap top -->
+  <polygon points="48,28 74,40 48,48 22,40" fill="#ede9fe" fill-opacity="0.95"/>
+  <!-- Cap brim -->
+  <polygon points="48,48 74,40 74,43 48,51 22,43 22,40" fill="#ddd6fe" fill-opacity="0.9"/>
+  <!-- Face -->
+  <circle cx="48" cy="58" r="12" fill="#f5f3ff" fill-opacity="0.9"/>
+  <!-- Eyes -->
+  <circle cx="44" cy="56" r="2" fill="#5b21b6"/>
+  <circle cx="52" cy="56" r="2" fill="#5b21b6"/>
+  <!-- Smile -->
+  <path d="M44 62 C46 65 50 65 52 62" stroke="#5b21b6" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <!-- Tassel -->
+  <line x1="74" y1="40" x2="78" y2="52" stroke="#fde68a" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="78" cy="54" r="3" fill="#fde68a"/>
+</svg>
