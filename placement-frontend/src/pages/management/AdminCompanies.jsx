@@ -7,6 +7,7 @@ import { fetchCompanies, addCompany, deleteCompany } from '../../features/compan
 import { validateEmail, validatePassword, validateRequired } from '../../utils/validation'
 import { downloadPDF } from '../../utils/download'
 import { adminAPI } from '../../services/api/adminAPI'
+import { toastSuccess, toastError } from '../../utils/toast'
 
 const inputClass = (err, isDark) =>
   `w-full rounded-2xl border px-5 py-3 text-sm font-bold outline-none transition-all focus:ring-4 focus:ring-indigo-500/10 ${err
@@ -27,6 +28,9 @@ export default function AdminCompanies() {
     companyName: '', companyDescription: '', companyWebsite: '', companyLocation: '',
     companyDifficulty: 'Moderate', email: '', password: '',
   })
+  const [companyFormErrors, setCompanyFormErrors] = useState({})
+  const [editCompanyErrors, setEditCompanyErrors] = useState({})
+
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 8
@@ -47,7 +51,7 @@ export default function AdminCompanies() {
     if (currentPage > totalPages && totalPages > 0) setCurrentPage(totalPages)
   }, [companies.length, totalPages])
 
-  const handleAddCompany = (e) => {
+  const handleAddCompany = async (e) => {
     e.preventDefault()
     const e1 = {}
     e1.companyName = validateRequired(companyForm.companyName, 'Company name')
@@ -59,7 +63,7 @@ export default function AdminCompanies() {
     setCompanyFormErrors(e1)
     if (Object.values(e1).some(Boolean)) return
 
-    dispatch(addCompany({
+    await dispatch(addCompany({
       companyName: companyForm.companyName.trim(),
       companyDescription: companyForm.companyDescription.trim(),
       companyWebsite: companyForm.companyWebsite.trim(),
@@ -68,17 +72,25 @@ export default function AdminCompanies() {
       email: companyForm.email.trim(),
       password: companyForm.password,
     }))
+    
+    // Refresh the list after adding
+    dispatch(fetchCompanies())
     setCompanyForm({ companyName: '', companyDescription: '', companyWebsite: '', companyLocation: '', companyDifficulty: 'Moderate', email: '', password: '' })
     setCompanyFormErrors({})
     setShowAddModal(false)
   }
 
   async function toggleCompanyActive(company) {
-    await adminAPI.setCompanyActive({
-      companyId: company?._id,
-      isActive: !(company?.isActive !== false),
-    })
-    dispatch(fetchCompanies())
+    try {
+      const res = await adminAPI.setCompanyActive({
+        companyId: company?._id,
+        isActive: !(company?.isActive !== false),
+      })
+      toastSuccess(res.data?.msg || 'Status updated')
+      dispatch(fetchCompanies())
+    } catch (err) {
+      toastError(err?.response?.data?.msg || 'Failed to update status')
+    }
   }
 
   async function handleUpdateCompany(e) {
@@ -94,18 +106,24 @@ export default function AdminCompanies() {
     setEditCompanyErrors(ve)
     if (Object.values(ve).some(Boolean)) return
 
-    await adminAPI.updateCompany({
-      companyId: editingCompany._id,
-      companyName: editingCompany.companyName,
-      companyDescription: editingCompany.companyDescription || '',
-      companyWebsite: editingCompany.companyWebsite || '',
-      companyLocation: editingCompany.companyLocation || '',
-      companyDifficulty: editingCompany.companyDifficulty || 'Moderate',
-      email: editingCompany.email || '',
-    })
-    setEditingCompany(null)
-    setEditCompanyErrors({})
-    dispatch(fetchCompanies())
+    try {
+      const res = await adminAPI.updateCompany({
+        companyId: editingCompany._id,
+        companyName: editingCompany.companyName,
+        companyDescription: editingCompany.companyDescription || '',
+        companyWebsite: editingCompany.companyWebsite || '',
+        companyLocation: editingCompany.companyLocation || '',
+        companyDifficulty: editingCompany.companyDifficulty || 'Moderate',
+        email: editingCompany.email || '',
+      });
+      toastSuccess(res.data?.msg || 'Company updated successfully')
+      setEditingCompany(null)
+      setEditCompanyErrors({})
+      dispatch(fetchCompanies())
+    } catch (err) {
+      toastError(err?.response?.data?.msg || 'Failed to update company')
+      console.error(err)
+    }
   }
 
   return (
@@ -213,9 +231,10 @@ export default function AdminCompanies() {
                       />
                        <IconButton 
                         icon={Trash} 
-                        onClick={() => {
+                        onClick={async () => {
                             if (window.confirm(`Permanently remove ${c.companyName}?`)) {
-                                dispatch(deleteCompany(c._id))
+                                await dispatch(deleteCompany(c._id))
+                                dispatch(fetchCompanies())
                             }
                         }} 
                         variant="red"
@@ -368,47 +387,70 @@ export default function AdminCompanies() {
           <form onSubmit={handleUpdateCompany} className={`relative w-full max-w-2xl rounded-[2.5rem] border p-8 shadow-2xl ${isDark ? 'border-zinc-800 bg-zinc-900' : 'border-white bg-white'}`} onClick={(e) => e.stopPropagation()}>
             <h3 className="text-xl font-black uppercase tracking-tight mb-8">Edit Configuration</h3>
             <div className="grid gap-5 md:grid-cols-2">
-              <input
-                value={editingCompany.companyName}
-                onChange={(e) => setEditingCompany((s) => ({ ...s, companyName: e.target.value }))}
-                className={inputClass(editCompanyErrors.companyName, isDark)}
-                placeholder="Company name *"
-              />
-              <input
-                value={editingCompany.companyLocation}
-                onChange={(e) => setEditingCompany((s) => ({ ...s, companyLocation: e.target.value }))}
-                className={inputClass(editCompanyErrors.companyLocation, isDark)}
-                placeholder="Location *"
-              />
-              <input
-                value={editingCompany.companyWebsite}
-                onChange={(e) => setEditingCompany((s) => ({ ...s, companyWebsite: e.target.value }))}
-                className={inputClass(editCompanyErrors.companyWebsite, isDark)}
-                placeholder="Website URL *"
-              />
-              <input
-                value={editingCompany.email}
-                onChange={(e) => setEditingCompany((s) => ({ ...s, email: e.target.value }))}
-                className={inputClass(editCompanyErrors.email, isDark)}
-                placeholder="Admin email *"
-                type="email"
-              />
-              <select
-                value={editingCompany.companyDifficulty}
-                onChange={(e) => setEditingCompany((s) => ({ ...s, companyDifficulty: e.target.value }))}
-                className={`md:col-span-2 ${inputClass(null, isDark)}`}
-              >
-                <option value="Easy">Easy</option>
-                <option value="Moderate">Moderate</option>
-                <option value="Hard">Hard</option>
-              </select>
-              <textarea
-                value={editingCompany.companyDescription}
-                onChange={(e) => setEditingCompany((s) => ({ ...s, companyDescription: e.target.value }))}
-                rows={2}
-                className={`md:col-span-2 ${inputClass(editCompanyErrors.companyDescription, isDark)}`}
-                placeholder="Description *"
-              />
+              <div className="space-y-1">
+                <label className="ml-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">Company name *</label>
+                <input
+                  value={editingCompany.companyName}
+                  onChange={(e) => setEditingCompany((s) => ({ ...s, companyName: e.target.value }))}
+                  className={inputClass(editCompanyErrors.companyName, isDark)}
+                  placeholder="Registered name"
+                />
+                {editCompanyErrors.companyName && <p className="mt-1 text-[10px] font-bold text-red-500">{editCompanyErrors.companyName}</p>}
+              </div>
+              <div className="space-y-1">
+                <label className="ml-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">Difficulty *</label>
+                <select
+                  value={editingCompany.companyDifficulty}
+                  onChange={(e) => setEditingCompany((s) => ({ ...s, companyDifficulty: e.target.value }))}
+                  className={inputClass(null, isDark)}
+                >
+                  <option value="Easy">Easy</option>
+                  <option value="Moderate">Moderate</option>
+                  <option value="Hard">Hard</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="ml-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">HQ location *</label>
+                <input
+                  value={editingCompany.companyLocation}
+                  onChange={(e) => setEditingCompany((s) => ({ ...s, companyLocation: e.target.value }))}
+                  className={inputClass(editCompanyErrors.companyLocation, isDark)}
+                  placeholder="City, country"
+                />
+                {editCompanyErrors.companyLocation && <p className="mt-1 text-[10px] font-bold text-red-500">{editCompanyErrors.companyLocation}</p>}
+              </div>
+              <div className="space-y-1">
+                <label className="ml-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">Website *</label>
+                <input
+                  value={editingCompany.companyWebsite}
+                  onChange={(e) => setEditingCompany((s) => ({ ...s, companyWebsite: e.target.value }))}
+                  className={inputClass(editCompanyErrors.companyWebsite, isDark)}
+                  placeholder="https://"
+                />
+                {editCompanyErrors.companyWebsite && <p className="mt-1 text-[10px] font-bold text-red-500">{editCompanyErrors.companyWebsite}</p>}
+              </div>
+              <div className="md:col-span-2 space-y-1 pt-4 border-t dark:border-zinc-800">
+                <label className="ml-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">Description *</label>
+                <textarea
+                  value={editingCompany.companyDescription}
+                  onChange={(e) => setEditingCompany((s) => ({ ...s, companyDescription: e.target.value }))}
+                  rows={2}
+                  className={inputClass(editCompanyErrors.companyDescription, isDark)}
+                  placeholder="Short company summary"
+                />
+                {editCompanyErrors.companyDescription && <p className="mt-1 text-[10px] font-bold text-red-500">{editCompanyErrors.companyDescription}</p>}
+              </div>
+              <div className="md:col-span-2 space-y-1">
+                <label className="ml-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">Login email *</label>
+                <input
+                  value={editingCompany.email}
+                  onChange={(e) => setEditingCompany((s) => ({ ...s, email: e.target.value }))}
+                  className={inputClass(editCompanyErrors.email, isDark)}
+                  placeholder="admin@company.com"
+                  type="email"
+                />
+                {editCompanyErrors.email && <p className="mt-1 text-[10px] font-bold text-red-500">{editCompanyErrors.email}</p>}
+              </div>
             </div>
             <div className="mt-8 flex gap-3">
               <button
