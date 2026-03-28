@@ -50,9 +50,18 @@ export default function Charts({ trends, companyStats, branchStats }) {
                 />
                 <Line 
                   type="monotone" 
+                  dataKey="applications" 
+                  name="Applications"
+                  stroke="#8b5cf6" 
+                  strokeWidth={4}
+                  activeDot={{ r: 8 }} 
+                  dot={{ r: 4, strokeWidth: 2 }}
+                />
+                <Line 
+                  type="monotone" 
                   dataKey="placements" 
                   name="Placements"
-                  stroke="#6366f1" 
+                  stroke="#10b981" 
                   strokeWidth={4}
                   activeDot={{ r: 8 }} 
                   dot={{ r: 4, strokeWidth: 2 }}
@@ -77,7 +86,7 @@ export default function Charts({ trends, companyStats, branchStats }) {
                   contentStyle={{ backgroundColor: tooltipBg, borderColor: gridColor, color: textColor, borderRadius: '12px' }}
                   cursor={{fill: isDark ? '#292524' : '#f5f5f4'}}
                 />
-                <Bar dataKey="count" name="Hires" fill="#10b981" radius={[6, 6, 0, 0]} barSize={40} />
+                <Bar dataKey="count" name="Total Engagement" fill="#8b5cf6" radius={[6, 6, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -127,7 +136,7 @@ export default function Charts({ trends, companyStats, branchStats }) {
                     {entry.name}
                  </span>
                  <span className="ml-auto text-sm font-medium text-stone-500">
-                    {entry.value} placements
+                    {entry.value} students
                  </span>
                </div>
              ))}

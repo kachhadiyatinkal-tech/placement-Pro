@@ -40,26 +40,29 @@ const getPlacementTrends = async (req, res) => {
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    const trends = await Application.aggregate([
+    const trendsRaw = await Application.aggregate([
       { 
         $match: { 
-          status: 'selected',
           updatedAt: { $gte: sixMonthsAgo }
         } 
       },
       {
         $group: {
           _id: { $dateToString: { format: "%Y-%m", date: "$updatedAt" } },
-          count: { $sum: 1 }
+          totalApplications: { $sum: 1 },
+          placements: { 
+            $sum: { $cond: [{ $eq: ["$status", "selected"] }, 1, 0] } 
+          }
         }
       },
       { $sort: { _id: 1 } }
     ]);
 
     // Format for charting
-    const formattedTrends = trends.map(t => ({
+    const formattedTrends = trendsRaw.map(t => ({
       month: t._id,
-      placements: t.count
+      applications: t.totalApplications,
+      placements: t.placements
     }));
 
     return sendSuccess(res, 200, {
@@ -76,7 +79,7 @@ const getPlacementTrends = async (req, res) => {
 const getCompanyStats = async (req, res) => {
   try {
     const companyStats = await Application.aggregate([
-      { $match: { status: 'selected' } },
+      // Count all applications dynamically
       {
         $lookup: {
           from: 'jobs',
@@ -88,7 +91,7 @@ const getCompanyStats = async (req, res) => {
       { $unwind: '$job' },
       {
         $lookup: {
-          from: 'companys', // note: schema uses 'companys' as collection name
+          from: 'companys', 
           localField: 'job.company',
           foreignField: '_id',
           as: 'company'
@@ -98,16 +101,16 @@ const getCompanyStats = async (req, res) => {
       {
         $group: {
           _id: '$company.companyName',
-          hiringCount: { $sum: 1 }
+          applicantCount: { $sum: 1 }
         }
       },
-      { $sort: { hiringCount: -1 } },
+      { $sort: { applicantCount: -1 } },
       { $limit: 10 }
     ]);
 
     const formattedStats = companyStats.map(stat => ({
       name: stat._id,
-      count: stat.hiringCount
+      count: stat.applicantCount
     }));
 
     return sendSuccess(res, 200, {
@@ -125,7 +128,7 @@ const getBranchStats = async (req, res) => {
   try {
     // We need to count total students per branch, and placed students per branch
     const branchPlacements = await Application.aggregate([
-      { $match: { status: 'selected' } },
+      // Dynamically count all students interacting with jobs
       {
         $lookup: {
           from: 'users',
@@ -138,7 +141,7 @@ const getBranchStats = async (req, res) => {
       {
         $group: {
           _id: '$student.studentProfile.department',
-          placedCount: { $addToSet: '$studentId' } // distinct placed students per branch
+          placedCount: { $addToSet: '$studentId' } // distinct students engaged per branch
         }
       },
       {
