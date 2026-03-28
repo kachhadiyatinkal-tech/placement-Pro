@@ -1,21 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import axios from 'axios'
+import { api } from '../../services/axios'
 import { toast } from 'react-toastify'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token')
-  return { headers: { Authorization: `Bearer ${token}` } }
-}
 
 export const applyJob = createAsyncThunk(
   'applications/applyJob',
-  async (jobId, { rejectWithValue }) => {
+  async ({ jobId, applicationData }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL.replace('/v1', '')}/applications/apply/${jobId}`, {}, getAuthHeaders())
+      const response = await api.post(`/api/applications/apply/${jobId}`, applicationData || {})
       toast.success('Successfully applied for the job!')
-      return response.data;
+      return response.data
     } catch (error) {
       toast.error(error.response?.data?.msg || 'Failed to apply')
       return rejectWithValue(error.response?.data?.msg)
@@ -27,7 +20,7 @@ export const fetchStudentApplications = createAsyncThunk(
   'applications/fetchStudentApplications',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL.replace('/v1', '')}/applications/student`, getAuthHeaders())
+      const response = await api.get('/api/applications/student')
       return response.data.data
     } catch (error) {
       return rejectWithValue(error.response?.data?.msg)
@@ -39,7 +32,7 @@ export const fetchApplicantsByJob = createAsyncThunk(
   'applications/fetchApplicantsByJob',
   async (jobId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL.replace('/v1', '')}/applications/job/${jobId}`, getAuthHeaders())
+      const response = await api.get(`/api/applications/job/${jobId}`)
       return { jobId, data: response.data.data }
     } catch (error) {
       return rejectWithValue(error.response?.data?.msg)
@@ -51,7 +44,7 @@ export const updateStatus = createAsyncThunk(
   'applications/updateStatus',
   async ({ id, status, interviewDetails }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL.replace('/v1', '')}/applications/status/${id}`, { status, interviewDetails }, getAuthHeaders())
+      const response = await api.put(`/api/applications/status/${id}`, { status, interviewDetails })
       toast.success('Application status updated!')
       return response.data.data
     } catch (error) {
@@ -65,7 +58,7 @@ export const scheduleInterview = createAsyncThunk(
   'applications/scheduleInterview',
   async ({ id, interviewDate, interviewLink }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL.replace('/v1', '')}/applications/schedule-interview/${id}`, { interviewDate, interviewLink }, getAuthHeaders())
+      const response = await api.put(`/api/applications/schedule-interview/${id}`, { interviewDate, interviewLink })
       toast.success('Interview scheduled!')
       return response.data.data
     } catch (error) {
@@ -81,7 +74,7 @@ export const uploadOfferLetter = createAsyncThunk(
     try {
       const formData = new FormData()
       formData.append('offerLetter', file)
-      const response = await axios.put(`${API_URL.replace('/v1', '')}/applications/upload-offer/${id}`, formData, getAuthHeaders())
+      const response = await api.put(`/api/applications/upload-offer/${id}`, formData)
       toast.success('Offer letter uploaded!')
       return response.data.data
     } catch (error) {
@@ -95,7 +88,7 @@ export const respondToOffer = createAsyncThunk(
   'applications/respondToOffer',
   async ({ id, isAccepted }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${API_URL.replace('/v1', '')}/applications/respond-offer/${id}`, { isAccepted }, getAuthHeaders())
+      const response = await api.put(`/api/applications/respond-offer/${id}`, { isAccepted })
       toast.success(isAccepted ? 'Offer Accepted!' : 'Offer Rejected')
       return response.data.data
     } catch (error) {
@@ -104,6 +97,7 @@ export const respondToOffer = createAsyncThunk(
     }
   }
 )
+
 
 const applicationSlice = createSlice({
   name: 'applications',

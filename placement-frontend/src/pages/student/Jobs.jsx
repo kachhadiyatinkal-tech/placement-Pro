@@ -74,7 +74,7 @@ export default function Jobs() {
     if (!jobId) return
 
     setApplyingId(jobId)
-    const res = await dispatch(submitApplication(jobId))
+    const res = await dispatch(submitApplication({ jobId, applicationData: application }))
     setApplyingId(null)
     if (res.meta.requestStatus === 'fulfilled') {
       setApplyJob(null)

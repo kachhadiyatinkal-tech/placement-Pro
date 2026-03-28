@@ -196,7 +196,7 @@ export default function ContactPageSettings() {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition hover:bg-emerald-500 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-2xl bg-[#8b5cf6] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#8b5cf6]/25 transition hover:bg-[#7c3aed] disabled:opacity-50"
             >
               <Save /> {saving ? 'Saving…' : 'Save changes'}
             </button>

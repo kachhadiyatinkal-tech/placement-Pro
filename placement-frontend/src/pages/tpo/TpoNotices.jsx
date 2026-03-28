@@ -59,7 +59,7 @@ export default function TpoNotices() {
     <div className="max-w-4xl space-y-8 pb-10">
       {/* Header Section */}
       <div className="flex flex-col gap-2">
-        <div className="inline-block w-fit rounded-xl bg-indigo-600/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 border border-indigo-600/20">
+        <div className="inline-block w-fit rounded-xl bg-[#8b5cf6]/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[#8b5cf6] dark:text-[#8b5cf6] border border-[#8b5cf6]/20">
           Communications
         </div>
         <h1 className="text-4xl font-black tracking-tight">Notices</h1>
@@ -72,12 +72,12 @@ export default function TpoNotices() {
         {/* Inbox Header */}
         <div className="flex items-center justify-between border-b border-zinc-500/10 pb-6 mb-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#8b5cf6] text-white shadow-lg shadow-[#8b5cf6]/20">
               <Bell size={20} />
             </div>
             <h2 className="text-lg font-black tracking-tight uppercase text-xs">Recent Inbox</h2>
           </div>
-          <span className="rounded-full bg-indigo-600/10 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-600 border border-indigo-600/20">
+          <span className="rounded-full bg-[#8b5cf6]/10 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-[#8b5cf6] border border-[#8b5cf6]/20">
             {status === 'loading' ? 'Syncing...' : `${notices?.length ?? 0} Announcements`}
           </span>
         </div>
@@ -91,8 +91,8 @@ export default function TpoNotices() {
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-indigo-600 animate-pulse" />
-                      <h3 className="truncate text-sm font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#8b5cf6] animate-pulse" />
+                      <h3 className="truncate text-sm font-black uppercase tracking-widest text-[#8b5cf6] dark:text-[#8b5cf6]">
                         {n?.title || 'Notice'}
                       </h3>
                     </div>
@@ -112,7 +112,7 @@ export default function TpoNotices() {
                   <button
                     type="button"
                     onClick={() => setSelectedNotice(n)}
-                    className="shrink-0 flex items-center gap-2 rounded-xl border border-indigo-600/20 bg-indigo-600/5 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-indigo-600 transition-all hover:bg-indigo-600 hover:text-white"
+                    className="shrink-0 flex items-center gap-2 rounded-xl border border-[#8b5cf6]/20 bg-[#8b5cf6]/5 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[#8b5cf6] transition-all hover:bg-[#8b5cf6] hover:text-white"
                   >
                     <Maximize2 /> Expand
                   </button>
@@ -148,8 +148,8 @@ export default function TpoNotices() {
                               {isPdf ? 'Document.pdf' : 'Attachment'}
                             </span>
                             <div className="flex gap-2">
-                              <a href={url} target="_blank" rel="noreferrer" className="p-2 text-indigo-600 hover:bg-indigo-600/10 rounded-lg transition-colors"><ExternalLink size={14} /></a>
-                              <a href={url} download className="p-2 text-indigo-600 hover:bg-indigo-600/10 rounded-lg transition-colors"><Download size={14} /></a>
+                              <a href={url} target="_blank" rel="noreferrer" className="p-2 text-[#8b5cf6] hover:bg-[#8b5cf6]/10 rounded-lg transition-colors"><ExternalLink size={14} /></a>
+                              <a href={url} download className="p-2 text-[#8b5cf6] hover:bg-[#8b5cf6]/10 rounded-lg transition-colors"><Download size={14} /></a>
                             </div>
                           </div>
                         )

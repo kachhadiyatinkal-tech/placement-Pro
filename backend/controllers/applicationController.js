@@ -52,6 +52,8 @@ const applyToJob = async (req, res) => {
     }
 
     const studentId = req.user._id;
+    const { coverLetter, phone, expectedGraduationYear } = req.body || {};
+
     const [student, job] = await Promise.all([
       User.findById(studentId),
       Job.findById(jobId),
@@ -79,6 +81,7 @@ const applyToJob = async (req, res) => {
     });
 
     // Keep legacy arrays in sync so existing dashboards continue to work.
+    // Also persist the application-specific form fields (cover letter, phone, grad year).
     await Promise.all([
       User.updateOne(
         { _id: studentId },
@@ -88,6 +91,9 @@ const applyToJob = async (req, res) => {
               jobId,
               status: 'applied',
               appliedAt: new Date(),
+              ...(coverLetter && { coverLetter }),
+              ...(phone && { phone }),
+              ...(expectedGraduationYear && { expectedGraduationYear }),
             },
           },
         }
@@ -151,7 +157,14 @@ const getJobApplicants = async (req, res) => {
     const applicants = await Application.find({ jobId })
       .populate({
         path: 'studentId',
-        select: 'first_name last_name email profile studentProfile.resume',
+        select:
+          'first_name last_name email number profile gender dateOfBirth fullAddress ' +
+          'studentProfile',
+      })
+      .populate({
+        path: 'jobId',
+        select: 'jobTitle company',
+        populate: { path: 'company', select: 'companyName companyLocation' },
       })
       .sort({ createdAt: -1 });
 
@@ -263,7 +276,7 @@ const scheduleInterview = async (req, res) => {
     application.interviewLink = interviewLink;
 
     await application.save();
-    
+
     // Sync legacy array status
     await syncLegacyStatus({
       studentId: application.studentId,
@@ -300,7 +313,7 @@ const uploadOfferLetterEndpoint = async (req, res) => {
     }
 
     // Set offer letter URL
-    const fileUrl = `${process.env.BACKEND_URL || 'http://localhost:'+process.env.PORT}/offerLetter/${req.file.filename}`;
+    const fileUrl = `${process.env.BACKEND_URL || 'http://localhost:' + process.env.PORT}/offerLetter/${req.file.filename}`;
     application.offerLetter = fileUrl;
 
     await application.save();

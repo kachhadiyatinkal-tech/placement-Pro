@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { api, API_BASE_URL } from '../../services/axios'
 import { toastError, toastSuccess } from '../../utils/toast'
 import { setRole } from '../../features/auth/authSlice'
-import { User, Camera, CheckCircle, Globe, MapPin, BarChart, Book } from 'lucide-react'
+import { User, Camera, CheckCircle, Globe, MapPin, BarChart, Book, Save } from 'lucide-react'
 import FormError from '../../components/FormError'
 import handleApiError from '../../utils/handleApiError'
 import {
@@ -352,7 +352,7 @@ export default function Profile() {
   return (
     <div className="max-w-5xl space-y-8 pb-20">
       <div className="flex flex-col gap-2">
-        <div className="inline-flex w-fit items-center rounded-xl border border-indigo-500/25 bg-indigo-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+        <div className="inline-flex w-fit items-center rounded-xl border border-[#8b5cf6]/20 bg-[#8b5cf6]/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[#8b5cf6] dark:text-[#8b5cf6]">
           Account
         </div>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">My profile</h1>
@@ -369,9 +369,9 @@ export default function Profile() {
                 <img
                   src={avatarUrl || `${API_BASE_URL}/profileImgs/default/defaultProfileImg.jpg`}
                   alt="Avatar"
-                  className="h-32 w-32 rounded-[2rem] border-4 border-indigo-500/15 object-cover shadow-lg transition-transform group-hover:scale-[1.02]"
+                  className="h-32 w-32 rounded-[2rem] border-4 border-[#8b5cf6]/15 object-cover shadow-lg transition-transform group-hover:scale-[1.02]"
                 />
-                <label className="absolute bottom-2 right-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border-4 border-white bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 dark:border-zinc-900">
+                <label className="absolute bottom-2 right-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border-4 border-white bg-[#8b5cf6] text-white shadow-lg hover:bg-[#8b5cf6] dark:border-zinc-900">
                   <Camera size={18} />
                   <input type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)} className="hidden" />
                 </label>
@@ -380,7 +380,7 @@ export default function Profile() {
               <h2 className="mt-6 text-xl font-bold tracking-tight">
                 {role === 'company' ? form.companyName : [form.first_name, form.last_name].filter(Boolean).join(' ') || 'User'}
               </h2>
-              <p className="mt-1 text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">{displayRole}</p>
+              <p className="mt-1 text-xs font-bold uppercase tracking-widest text-[#8b5cf6] dark:text-[#8b5cf6]">{displayRole}</p>
 
               {avatarFile && (
                 <button
@@ -398,7 +398,7 @@ export default function Profile() {
         <form onSubmit={handleSave} className={`${cardStyle} space-y-8 lg:col-span-2`}>
           <FormError error={formError} className="mt-0" />
           <div className={`flex items-center gap-2 border-b pb-4 ${isDark ? 'border-zinc-800' : 'border-zinc-200'}`}>
-            <User className="text-indigo-600 dark:text-indigo-400" />
+            <User className="text-[#8b5cf6] dark:text-[#8b5cf6]" />
             <h3 className="text-sm font-bold uppercase tracking-widest">Details</h3>
           </div>
 
@@ -831,11 +831,7 @@ export default function Profile() {
           <button
             type="submit"
             disabled={saving}
-            className={`inline-flex items-center justify-center gap-2 rounded-2xl border-2 px-10 py-3.5 text-sm font-bold transition-all active:scale-[0.99] disabled:opacity-50 ${
-              isDark
-                ? 'border-indigo-500 text-indigo-300 hover:bg-indigo-500 hover:text-white'
-                : 'border-indigo-600 text-indigo-700 hover:bg-indigo-600 hover:text-white'
-            }`}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#8b5cf6] px-10 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#8b5cf6]/20 transition-all hover:bg-[#7c3aed] active:scale-[0.99] disabled:opacity-50"
           >
             {saving ? (
               <>
@@ -843,7 +839,9 @@ export default function Profile() {
                 Saving…
               </>
             ) : (
-              'Save changes'
+              <>
+                <Save size={18} /> Save changes
+              </>
             )}
           </button>
         </form>
