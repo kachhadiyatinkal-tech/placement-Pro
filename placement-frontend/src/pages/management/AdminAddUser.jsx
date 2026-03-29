@@ -14,6 +14,7 @@ import { adminAPI } from '../../services/api/adminAPI'
 import { downloadPDF } from '../../utils/download'
 import Pagination from '../../components/common/Pagination'
 import IconButton from '../../components/common/IconButton'
+import DetailViewerModal from '../../components/common/DetailViewerModal'
 
 const inputClass = (err, isDark) =>
   `w-full rounded-2xl border px-5 py-3 text-sm font-bold outline-none transition-all focus:ring-4 focus:ring-indigo-500/10 ${
@@ -125,6 +126,15 @@ export default function AdminAddUser() {
     await loadUsers()
   }
 
+  async function toggleUserActive(u) {
+    await adminAPI.setUserActive({
+      userId: u?._id,
+      email: u?.email,
+      isActive: !(u?.isActive !== false),
+    })
+    await loadUsers()
+  }
+
   const getTypeStyle = (type) => {
     const styles = {
       management: isDark ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 'bg-purple-50 text-purple-700 border-purple-100',
@@ -186,6 +196,7 @@ export default function AdminAddUser() {
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">User Profile</th>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Contact Email</th>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Account Type</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-center">Account Status</th>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 text-right">Management</th>
               </tr>
             </thead>
@@ -202,6 +213,19 @@ export default function AdminAddUser() {
                     <span className={`inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getTypeStyle(u?.listType || u?.role)}`}>
                       {u?.listType || u?.role || 'User'}
                     </span>
+                  </td>
+                  <td className="px-8 py-6">
+                    <div className="flex items-center justify-center">
+                      <label className="relative inline-flex cursor-pointer items-center">
+                        <input
+                          type="checkbox"
+                          className="peer sr-only"
+                          checked={u?.isActive !== false}
+                          onChange={() => toggleUserActive(u)}
+                        />
+                        <div className={`h-6 w-11 rounded-full transition-all after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-white after:bg-white after:transition-all after:content-[''] peer-checked:bg-brand-500 peer-checked:after:translate-x-full ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
+                      </label>
+                    </div>
                   </td>
                   <td className="px-8 py-6 text-right">
                     <div className="flex justify-end gap-1 px-2">
@@ -317,21 +341,8 @@ export default function AdminAddUser() {
         </div>
       )}
 
-      {/* Details (JSON) Modal */}
-      {selectedUser && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-xl" onClick={() => setSelectedUser(null)} />
-          <div className={`relative w-full max-w-lg rounded-[2.5rem] border p-8 shadow-2xl ${isDark ? 'border-zinc-800 bg-zinc-900' : 'border-white bg-white'}`}>
-            <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-xl font-black uppercase tracking-tight">System Object</h3>
-                <button onClick={() => setSelectedUser(null)} className="text-zinc-400 hover:text-zinc-600"><X size={20} /></button>
-            </div>
-            <div className={`max-h-[60vh] overflow-auto rounded-3xl p-6 font-mono text-[10px] ${isDark ? 'bg-zinc-950 text-indigo-400' : 'bg-zinc-50 text-indigo-600'}`}>
-                <pre>{JSON.stringify(selectedUser, null, 2)}</pre>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Details Modal */}
+      <DetailViewerModal isOpen={!!selectedUser} onClose={() => setSelectedUser(null)} data={selectedUser} title="User Database Details" />
 
       {/* Edit User Modal */}
       {editingUser && (

@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { PenLine, Plus, Trash, Briefcase, Clock, DollarSign, Activity, FileText } from 'lucide-react'
+import { PenLine, Plus, Trash, Briefcase, Clock, DollarSign, Activity, FileText, Eye } from 'lucide-react'
 import IconButton from '../../components/common/IconButton'
 import Pagination from '../../components/common/Pagination'
 import { deleteJob, fetchJobs, postJob } from '../../features/jobs/jobSlice'
 import { fetchCompanies } from '../../features/companies/companiesSlice'
 import JobFormModal from '../../components/JobFormModal'
+import DetailViewerModal from '../../components/common/DetailViewerModal'
 import { isApplicationDeadlinePassed } from '../../utils/jobDeadline'
 
 const EMPTY_FORM = {
@@ -54,6 +55,7 @@ export default function AdminJobs() {
   const isDark = mode === 'dark'
 
   const [modalOpen, setModalOpen] = useState(false)
+  const [viewingJob, setViewingJob] = useState(null)
   const [editingJob, setEditingJob] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -238,6 +240,7 @@ export default function AdminJobs() {
                       </td>
                       <td className="px-8 py-6 text-right">
                         <div className="flex justify-end gap-1 px-2">
+                          <IconButton icon={Eye} onClick={() => setViewingJob(job)} variant="zinc" size={16} />
                           <IconButton icon={PenLine} onClick={() => openEdit(job)} variant="indigo" size={16} />
                           <IconButton icon={Trash} onClick={() => { setDeleteTarget(job); setDeleteText(''); setDeleteErr(''); }} variant="red" size={16} />
                         </div>
@@ -272,6 +275,9 @@ export default function AdminJobs() {
         apiErrors={jobFormErrors}
         clearApiErrors={() => setJobFormErrors({})}
       />
+
+      {/* Database Dump Viewer */}
+      <DetailViewerModal isOpen={!!viewingJob} onClose={() => setViewingJob(null)} data={viewingJob} title="Job Database Details" />
 
       {deleteTarget &&
         createPortal(

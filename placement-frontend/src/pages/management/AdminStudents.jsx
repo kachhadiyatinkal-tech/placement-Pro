@@ -7,6 +7,7 @@ import { Download, PenLine, Eye, Hash, ShieldCheck, X, Trash } from 'lucide-reac
 import IconButton from '../../components/common/IconButton'
 import Pagination from '../../components/common/Pagination'
 import PageHeader from '../../components/ui/PageHeader'
+import DetailViewerModal from '../../components/common/DetailViewerModal'
 
 // Helper pickers remain the same
 function safePickName(s) { return s?.first_name || s?.name || s?.fullName || '—' }
@@ -111,7 +112,7 @@ export default function AdminStudents() {
               <tr className="border-b border-app bg-surface-soft/50">
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted">Identity</th>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted">Contact Details</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted">System Status</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted text-center">Account Status</th>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-muted text-right">Operations</th>
               </tr>
             </thead>
@@ -138,34 +139,16 @@ export default function AdminStudents() {
                     </div>
                   </td>
                   <td className="px-8 py-6">
-                    <div className="flex items-center gap-4">
-                      {/* The Toggle Switch */}
+                    <div className="flex items-center justify-center">
                       <label className="relative inline-flex cursor-pointer items-center">
                         <input
                           type="checkbox"
-                          className="sr-only peer"
+                          className="peer sr-only"
                           checked={s?.isActive !== false}
                           onChange={() => toggleStudentActive(s)}
                         />
-                        <div className={`
-                          h-5 w-9 rounded-full transition-all duration-300 bg-surface-soft border border-app
-                          peer-checked:bg-emerald-500/20 peer-checked:border-emerald-500/30
-                          after:absolute after:top-[3px] after:left-[3px] after:h-3.5 after:w-3.5 
-                          after:rounded-full after:transition-all after:duration-300 after:bg-muted/30
-                          peer-checked:after:translate-x-[16px] peer-checked:after:bg-emerald-500 shadow-inner
-                          peer-focus:ring-4 peer-focus:ring-emerald-500/10
-                        `} />
+                        <div className={`h-6 w-11 rounded-full transition-all after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-white after:bg-white after:transition-all after:content-[''] peer-checked:bg-brand-500 peer-checked:after:translate-x-full ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
                       </label>
- 
-                      {/* Status Label */}
-                      <div className="flex flex-col">
-                        <span className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-300 ${s?.isActive === false
-                            ? 'text-muted opacity-50'
-                            : 'text-emerald-500'
-                          }`}>
-                          {s?.isActive === false ? 'Suspended' : 'Verified'}
-                        </span>
-                      </div>
                     </div>
                   </td>
                   <td className="px-8 py-6 text-right">
@@ -210,11 +193,13 @@ export default function AdminStudents() {
       />
 
       {/* Modern Modal for Details/Edit */}
-      {(selectedStudent || editingStudent) && (
+      <DetailViewerModal isOpen={!!selectedStudent} onClose={() => setSelectedStudent(null)} data={selectedStudent} title="Student Database Details" />
+
+      {editingStudent && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-3xl bg-black/60 transition-all duration-500">
           <div className="relative w-full max-w-xl rounded-[2.5rem] border border-app bg-surface shadow-2xl p-8 animate-modal-in transform">
             <button 
-              onClick={() => { setSelectedStudent(null); setEditingStudent(null); }}
+              onClick={() => setEditingStudent(null)}
               className="absolute top-8 right-8 text-muted hover:text-app transition-colors"
             >
               <X size={20} />
@@ -225,17 +210,17 @@ export default function AdminStudents() {
                  <ShieldCheck size={12} /> Student Records
                </div>
                <h2 className="text-3xl font-black tracking-tighter text-app uppercase">
-                 {editingStudent ? 'Update Details' : 'Student Overview'}
+                 Update Details
                </h2>
                <p className="text-[10px] font-bold text-muted uppercase tracking-widest mt-2">
-                 Registry ID: {(selectedStudent?._id || editingStudent?._id)}
+                 Registry ID: {editingStudent?._id}
                </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
               <div className="space-y-1">
                 <p className="text-[9px] font-black uppercase tracking-widest text-muted opacity-60">Full Name</p>
-                <p className="text-sm font-bold text-app">{safePickName(selectedStudent || editingStudent)}</p>
+                <p className="text-sm font-bold text-app">{safePickName(editingStudent)}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-[9px] font-black uppercase tracking-widest text-muted opacity-60">Auth Level</p>
@@ -243,17 +228,17 @@ export default function AdminStudents() {
               </div>
               <div className="space-y-1">
                 <p className="text-[9px] font-black uppercase tracking-widest text-muted opacity-60">Email Access</p>
-                <p className="text-sm font-bold text-app">{safePickEmail(selectedStudent || editingStudent)}</p>
+                <p className="text-sm font-bold text-app">{safePickEmail(editingStudent)}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-[9px] font-black uppercase tracking-widest text-muted opacity-60">Telecom Identifier</p>
-                <p className="text-sm font-bold text-app">{safePickPhone(selectedStudent || editingStudent)}</p>
+                <p className="text-sm font-bold text-app">{safePickPhone(editingStudent)}</p>
               </div>
             </div>
 
             <div className="mt-10 flex gap-3">
               <button
-                onClick={() => { setSelectedStudent(null); setEditingStudent(null); }}
+                onClick={() => setEditingStudent(null)}
                 className="flex-1 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all bg-surface-soft text-muted hover:bg-surface hover:text-app border border-app"
               >
                 Dismiss Window

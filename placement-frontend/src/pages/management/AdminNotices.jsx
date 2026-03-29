@@ -7,7 +7,7 @@ import {
   updateNotice,
 } from '../../features/management/managementSlice'
 import { validateRequired } from '../../utils/validation'
-import NoticeDetailModal from '../../components/NoticeDetailModal'
+import DetailViewerModal from '../../components/common/DetailViewerModal'
 import { API_BASE_URL } from '../../services/axios'
 import { downloadPDF } from '../../utils/download'
 import { Download, PenLine, Eye, Plus, Shield, Trash, Megaphone, Clock } from 'lucide-react'
@@ -87,10 +87,6 @@ export default function AdminNotices() {
     })
   }
 
-  function canEditNotice(n) {
-    if (!n?.createdAt) return false
-    return Date.now() - new Date(n.createdAt).getTime() <= 30 * 60 * 1000 // Extended to 30 mins
-  }
 
   async function handleUpdateNotice(e) {
     e.preventDefault()
@@ -217,7 +213,6 @@ export default function AdminNotices() {
                         variant="zinc"
                         size={16}
                       />
-                       {canEditNotice(n) && (
                         <IconButton 
                             icon={PenLine} 
                             onClick={() => {
@@ -227,7 +222,6 @@ export default function AdminNotices() {
                             variant="indigo"
                             size={16}
                         />
-                       )}
                        <IconButton 
                         icon={Trash} 
                         onClick={() => {
@@ -358,7 +352,7 @@ export default function AdminNotices() {
         </div>
       )}
 
-      <NoticeDetailModal notice={selectedNotice} onClose={() => setSelectedNotice(null)} />
+      <DetailViewerModal isOpen={!!selectedNotice} onClose={() => setSelectedNotice(null)} data={selectedNotice} title="Notice Database Details" />
     </div>
   )
 }

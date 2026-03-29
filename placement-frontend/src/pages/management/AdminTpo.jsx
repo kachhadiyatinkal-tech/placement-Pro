@@ -7,6 +7,7 @@ import { validateEmail, validatePassword, validatePhoneRequired, validateRequire
 import { Download, PenLine, Eye, Plus, Briefcase, X, User, Trash } from 'lucide-react'
 import IconButton from '../../components/common/IconButton'
 import Pagination from '../../components/common/Pagination'
+import DetailViewerModal from '../../components/common/DetailViewerModal'
 
 export default function AdminTpo() {
   const dispatch = useDispatch()
@@ -165,7 +166,7 @@ export default function AdminTpo() {
               <tr className={`${isDark ? 'bg-zinc-900/80 text-zinc-500' : 'bg-zinc-50 text-zinc-500'}`}>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em]">Officer</th>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em]">Email Address</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em]">Status</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-center">Account Status</th>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-right">Actions</th>
               </tr>
             </thead>
@@ -184,18 +185,16 @@ export default function AdminTpo() {
                     {u.email}
                   </td>
                   <td className="px-8 py-6">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center">
                       <label className="relative inline-flex cursor-pointer items-center">
-                        <input type="checkbox" className="sr-only peer" checked={u?.isActive !== false} onChange={() => toggleTpoActive(u)} />
-                        <div className={`h-5 w-9 rounded-full transition-all duration-300 border ${
-                          isDark ? 'bg-zinc-950 border-zinc-800 peer-checked:border-emerald-500/50' : 'bg-zinc-200 border-zinc-300 peer-checked:border-emerald-200'
-                        } after:absolute after:top-[3px] after:left-[4px] after:h-3 after:w-3 after:rounded-full after:transition-all ${
-                          isDark ? 'after:bg-zinc-700' : 'after:bg-white'
-                        } peer-checked:after:translate-x-3.5 peer-checked:after:bg-emerald-500`} />
+                        <input
+                          type="checkbox"
+                          className="peer sr-only"
+                          checked={u?.isActive !== false}
+                          onChange={() => toggleTpoActive(u)}
+                        />
+                        <div className={`h-6 w-11 rounded-full transition-all after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-white after:bg-white after:transition-all after:content-[''] peer-checked:bg-brand-500 peer-checked:after:translate-x-full ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
                       </label>
-                      <span className={`text-[9px] font-black uppercase tracking-widest ${u?.isActive === false ? 'text-zinc-500' : 'text-emerald-500'}`}>
-                        {u?.isActive === false ? 'Disabled' : 'Enabled'}
-                      </span>
                     </div>
                   </td>
                   <td className="px-8 py-6 text-right">
@@ -352,30 +351,7 @@ export default function AdminTpo() {
       )}
 
       {/* Details View Modal */}
-      {selectedTpo && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 backdrop-blur-md bg-black/60" onClick={() => setSelectedTpo(null)}>
-          <div className={`relative w-full max-w-lg rounded-[2.5rem] border p-10 shadow-2xl ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-100'}`} onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-start mb-6">
-              <h3 className="text-2xl font-black uppercase tracking-tighter">Information</h3>
-              <button onClick={() => setSelectedTpo(null)} className={isDark ? 'text-zinc-500 hover:text-white' : 'text-zinc-400 hover:text-zinc-900'}><X size={20}/></button>
-            </div>
-            <div className="grid gap-4">
-              {[
-                { label: 'Officer', value: `${selectedTpo.first_name} ${selectedTpo.last_name}` },
-                { label: 'Email', value: selectedTpo.email },
-                { label: 'Phone', value: selectedTpo.number },
-                { label: 'Designation', value: selectedTpo?.tpoProfile?.position },
-                { label: 'Account', value: selectedTpo?.isActive === false ? 'Suspended' : 'Live', color: 'text-emerald-500' }
-              ].map((item, i) => (
-                <div key={i} className={`flex justify-between border-b pb-2 ${isDark ? 'border-zinc-800' : 'border-zinc-50'}`}>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{item.label}</span>
-                  <span className={`font-bold text-sm ${item.color || (isDark ? 'text-zinc-200' : 'text-zinc-800')}`}>{item.value || '—'}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <DetailViewerModal isOpen={!!selectedTpo} onClose={() => setSelectedTpo(null)} data={selectedTpo} title="TPO Database Details" />
 
     </div>
   )

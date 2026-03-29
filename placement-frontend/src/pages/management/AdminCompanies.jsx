@@ -8,6 +8,7 @@ import { validateEmail, validatePassword, validateRequired } from '../../utils/v
 import { downloadPDF } from '../../utils/download'
 import { adminAPI } from '../../services/api/adminAPI'
 import { toastSuccess, toastError } from '../../utils/toast'
+import DetailViewerModal from '../../components/common/DetailViewerModal'
 
 const inputClass = (err, isDark) =>
   `w-full rounded-2xl border px-5 py-3 text-sm font-bold outline-none transition-all focus:ring-4 focus:ring-indigo-500/10 ${err
@@ -207,7 +208,7 @@ export default function AdminCompanies() {
                           checked={c?.isActive !== false}
                           onChange={() => toggleCompanyActive(c)}
                         />
-                        <div className={`h-6 w-11 rounded-full transition-all after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-white after:bg-white after:transition-all after:content-[''] peer-checked:bg-indigo-600 peer-checked:after:translate-x-full ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'
+                        <div className={`h-6 w-11 rounded-full transition-all after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-white after:bg-white after:transition-all after:content-[''] peer-checked:bg-brand-500 peer-checked:after:translate-x-full ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'
                           }`} />
                       </label>
                     </div>
@@ -354,31 +355,8 @@ export default function AdminCompanies() {
         </div>
       )}
 
-      {/* View Modal */}
-      {selectedCompany && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-xl" onClick={() => setSelectedCompany(null)} />
-          <div className={`relative w-full max-w-lg rounded-[2.5rem] border p-10 shadow-2xl ${isDark ? 'border-zinc-800 bg-zinc-900' : 'border-white bg-white'}`}>
-            <h3 className="text-2xl font-black uppercase tracking-tight mb-2">{selectedCompany.companyName}</h3>
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{selectedCompany.companyDifficulty} Difficulty</span>
-            <div className="mt-8 space-y-4">
-              <p className="text-sm font-bold text-zinc-600 dark:text-zinc-400 italic leading-relaxed">
-                "{selectedCompany.companyDescription || 'No description provided.'}"
-              </p>
-              <div className="pt-4 grid grid-cols-2 gap-4 border-t dark:border-zinc-800">
-                <div>
-                  <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Admin Email</label>
-                  <p className="text-xs font-bold">{selectedCompany.email || '—'}</p>
-                </div>
-                <div>
-                  <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Website</label>
-                  <p className="text-xs font-bold text-indigo-500">{selectedCompany.companyWebsite || '—'}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Detail Viewer Modal */}
+      <DetailViewerModal isOpen={!!selectedCompany} onClose={() => setSelectedCompany(null)} data={selectedCompany} title="Company Database Details" />
 
       {/* Edit Modal (Logic identical to Add Modal) */}
       {editingCompany && (
