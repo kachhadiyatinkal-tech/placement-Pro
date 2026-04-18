@@ -81,7 +81,7 @@ const submitTest = async (req, res) => {
             userId,
             score,
             totalQuestions,
-            accuracy: accuracy.toFixed(2),
+            accuracy: parseFloat(accuracy.toFixed(2)),
             categoryBreakdown: {
                 aptitude: categoryStats.Aptitude,
                 reasoning: categoryStats.Reasoning,

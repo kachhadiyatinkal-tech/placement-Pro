@@ -14,6 +14,7 @@ const {
   CompanyMyProfile,
   UpdateCompanyProfile,
   UploadCompanyLogo,
+  GetMyJobs,
 } = require('../controllers/Company/company.all-company.controller')
 const companyLogin = require('../controllers/Company/company.login.controller')
 const companySignup = require('../controllers/Company/company.signup.controller')
@@ -37,5 +38,8 @@ router.get('/company-data', CompanyDetail)
 router.get('/my-profile', authenticateToken, CompanyMyProfile)
 router.post('/update-profile', authenticateToken, UpdateCompanyProfile)
 router.post('/upload-logo', authenticateToken, uploadUserProfile.single('profileImgs'), UploadCompanyLogo)
+
+// Jobs scoped to the logged-in company (uses JWT — no spoofing)
+router.get('/my-jobs', authenticateToken, GetMyJobs)
 
 module.exports = router

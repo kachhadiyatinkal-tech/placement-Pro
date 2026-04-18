@@ -25,6 +25,8 @@ const UserSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
   resetToken: { type: String },
   resetTokenExpiry: { type: Date },
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date },
   isProfileCompleted: { type: Boolean, default: false },
   // Student specific fields
   studentProfile: {

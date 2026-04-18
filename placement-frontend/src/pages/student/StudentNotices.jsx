@@ -38,7 +38,8 @@ function isPdfUrl(url) {
 export default function StudentNotices() {
   const dispatch = useDispatch()
   const { notices, status } = useSelector((s) => s.notices)
-  const isDark = useSelector((s) => s.theme?.isDark ?? true)
+  const mode = useSelector((s) => s.theme?.mode || 'light')
+  const isDark = mode === 'dark'
   const [selectedNotice, setSelectedNotice] = useState(null)
 
   useEffect(() => {
@@ -78,7 +79,7 @@ export default function StudentNotices() {
         </div>
 
         {/* Notices Container */}
-        <div className="divide-y divide-zinc-800/50 max-h-[70vh] overflow-y-auto custom-scrollbar">
+        <div className={`divide-y max-h-[70vh] overflow-y-auto custom-scrollbar ${isDark ? 'divide-zinc-800/50' : 'divide-zinc-100'}`}>
           {(notices || []).map((n) => {
             const attachmentUrls = getAttachmentUrls(n)
             return (
@@ -97,13 +98,13 @@ export default function StudentNotices() {
                     <button
                       type="button"
                       onClick={() => setSelectedNotice(n)}
-                      className="p-3 rounded-2xl bg-zinc-800 hover:bg-indigo-600 text-zinc-100 transition-all shadow-lg"
+                      className={`p-3 rounded-2xl transition-all shadow-lg hover:bg-indigo-600 hover:text-white ${isDark ? 'bg-zinc-800 text-zinc-100' : 'bg-zinc-100 text-zinc-900'}`}
                     >
                       <Maximize2 size={18} />
                     </button>
                   </div>
 
-                  <p className="text-sm font-medium text-zinc-400 leading-relaxed max-w-3xl italic">
+                  <p className={`text-sm font-medium leading-relaxed max-w-3xl italic ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>
                     {n?.message}
                   </p>
 
@@ -115,7 +116,7 @@ export default function StudentNotices() {
                         const isPdf = isPdfUrl(url)
                         
                         return (
-                          <div key={url} className="flex items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-3 pr-5">
+                          <div key={url} className={`flex items-center gap-3 rounded-2xl border p-3 pr-5 ${isDark ? 'border-zinc-800 bg-zinc-900/50' : 'border-zinc-200 bg-zinc-50'}`}>
                             <div className={`p-2.5 rounded-xl ${isPdf ? 'bg-red-500/10 text-red-500' : 'bg-indigo-500/10 text-indigo-500'}`}>
                               {isImg ? <Image size={18} /> : <File size={18} />}
                             </div>
@@ -125,7 +126,7 @@ export default function StudentNotices() {
                                 <a href={url} target="_blank" rel="noreferrer" className="text-[10px] font-black text-indigo-500 hover:underline flex items-center gap-1">
                                   VIEW <ExternalLink size={10} />
                                 </a>
-                                <a href={url} download className="text-[10px] font-black text-zinc-300 hover:underline flex items-center gap-1">
+                                <a href={url} download className={`text-[10px] font-black hover:underline flex items-center gap-1 ${isDark ? 'text-zinc-300' : 'text-zinc-500'}`}>
                                   DOWNLOAD <Download size={10} />
                                 </a>
                               </div>
@@ -143,7 +144,7 @@ export default function StudentNotices() {
           {/* Empty State */}
           {!(notices || []).length && status !== 'loading' && (
             <div className="py-24 text-center">
-              <div className="inline-flex h-20 w-20 items-center justify-center rounded-[2rem] bg-zinc-800/30 text-zinc-600 mb-6">
+              <div className={`inline-flex h-20 w-20 items-center justify-center rounded-[2rem] mb-6 ${isDark ? 'bg-zinc-800/30 text-zinc-600' : 'bg-zinc-100 text-zinc-400'}`}>
                 <Bell size={32} />
               </div>
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Inbox Clear — No New Alerts</p>

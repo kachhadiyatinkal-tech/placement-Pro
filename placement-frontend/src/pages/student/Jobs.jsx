@@ -14,7 +14,8 @@ export default function Jobs() {
   const { jobs, status } = useSelector((s) => s.jobs)
   const { applications } = useSelector((s) => s.applications)
   const user = useSelector((s) => s.auth.user)
-  const isDark = useSelector((s) => s.theme?.isDark ?? true)
+  const mode = useSelector((s) => s.theme?.mode || 'light')
+  const isDark = mode === 'dark'
 
   const [query, setQuery] = useState('')
   const [detailJob, setDetailJob] = useState(null)

@@ -1,7 +1,7 @@
 import { api } from '../../services/axios'
 
 export const companyAPI = {
-  fetchJobs: (companyId) => api.get(`/api/v1/tpo/jobs${companyId ? `?companyId=${companyId}` : ''}`),
+  fetchJobs: () => api.get('/api/v1/company/my-jobs'),
   postJob: (payload) => api.post('/api/v1/tpo/post-job', payload),
   updateJob: (payload) => {
     const { jobId, _id, ...rest } = payload
@@ -11,6 +11,6 @@ export const companyAPI = {
   getJob: (jobId) => api.get(`/api/v1/tpo/job/${jobId}`),
   fetchApplicants: (jobId) => api.get(`/api/applications/job/${jobId}`),
   updateApplicationStatus: ({ applicationId, status, interviewDetails }) =>
-    api.put(`/api/applications/${applicationId}/status`, { status, interviewDetails }),
+    api.put(`/api/applications/status/${applicationId}`, { status, interviewDetails }),
 }
 

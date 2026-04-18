@@ -45,5 +45,10 @@ router.get('/get-notice', GetNotice);
 router.post('/delete-notice', DeleteNotice);
 router.post('/update-notice', authenticateToken, UpdateNotice);
 
+// SMTP configuration
+const { getSmtpConfig, updateSmtpConfig } = require('../controllers/management/smtp.controller');
+router.get('/smtp-config', authenticateToken, getSmtpConfig);
+router.post('/update-smtp-config', authenticateToken, updateSmtpConfig);
+
 
 module.exports = router;

@@ -54,6 +54,7 @@ export default function Sidebar() {
           { to: '/admin/notices', icon: Bell, label: 'Notices' },
           { to: '/admin/chatbot-settings', icon: MessageCircle, label: 'Chatbot' },
           { to: '/admin/contact-page', icon: Mail, label: 'Contact page' },
+          { to: '/admin/smtp-settings', icon: Settings, label: 'Email Settings' },
         ]
         : role === 'company'
           ? [

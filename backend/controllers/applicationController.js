@@ -56,7 +56,7 @@ const applyToJob = async (req, res) => {
 
     const [student, job] = await Promise.all([
       User.findById(studentId),
-      Job.findById(jobId),
+      Job.findById(jobId).populate('company'),
     ]);
 
     if (!student || String(student.role).toLowerCase() !== 'student') {
@@ -112,6 +112,21 @@ const applyToJob = async (req, res) => {
       ),
     ]);
 
+    const { enqueueEmail } = require('../services/email.queue');
+
+    // Send confirmation email to student (Fire and forget)
+    enqueueEmail({
+      email: student.email,
+      subject: `Application Received: ${job.jobTitle}`,
+      template: 'jobApplication',
+      templateData: {
+        studentName: `${student.first_name} ${student.last_name}`,
+        jobTitle: job.jobTitle,
+        companyName: job.company?.companyName || 'the company'
+      },
+      message: `Hello ${student.first_name}, your application for ${job.jobTitle} has been received.`
+    }).catch(err => console.log('Failed to queue application email:', err));
+
     return res.status(201).json({ msg: 'Application submitted successfully.', application });
   } catch (error) {
     if (error?.code === 11000) {
@@ -154,7 +169,12 @@ const getJobApplicants = async (req, res) => {
       return res.status(400).json({ msg: 'Invalid job id.' });
     }
 
-    const applicants = await Application.find({ jobId })
+    const query = { jobId };
+    if (req.user.role === 'company') {
+      query.companyId = req.user._id;
+    }
+
+    const applicants = await Application.find(query)
       .populate({
         path: 'studentId',
         select:
@@ -220,6 +240,10 @@ const updateApplicationStatus = async (req, res) => {
     const application = await Application.findById(applicationId);
     if (!application) {
       return res.status(404).json({ msg: 'Application not found.' });
+    }
+
+    if (req.user.role === 'company' && String(application.companyId) !== String(req.user._id)) {
+      return res.status(403).json({ msg: 'You can only update your own applications.' });
     }
 
     const current = application.status;

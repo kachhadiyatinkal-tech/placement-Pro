@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Users, Download, Search, Mail, Cpu, ExternalLink } from 'lucide-react'
+import { API_BASE_URL } from '../../services/axios'
 import Loader from '../../components/Loader'
 import {
   fetchCompanyApplicants,
@@ -66,14 +67,16 @@ export default function CompanyApplicants() {
     return displayedApplicants.slice(start, start + itemsPerPage)
   }, [displayedApplicants, currentPage, itemsPerPage])
 
-  function resumeHref(student) {
-    return (
-      student?.resume ||
-      student?.resumeUrl ||
-      student?.resumePath ||
-      student?.studentId?.studentProfile?.resume?.filepath ||
-      undefined
-    )
+  function resumeHref(app) {
+    const raw =
+      app?.resume ||
+      app?.studentId?.studentProfile?.resume?.filepath ||
+      app?.studentProfile?.resume?.filepath
+    if (!raw) return undefined
+    if (raw.startsWith('http') || raw.startsWith('data:')) return raw
+    // Ensure the raw path has the leading slash if needed, but not double
+    const slash = raw.startsWith('/') ? '' : '/'
+    return `${API_BASE_URL}${slash}${raw}`
   }
 
   const statusClasses = (status) => {
@@ -219,24 +222,18 @@ export default function CompanyApplicants() {
                         <span className={`inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${statusClasses(a?.status)}`}>
                           {a?.status || 'Applied'}
                         </span>
-                        <select
-                          value={a?.status || 'applied'}
-                          disabled={updatingId === (a?._id || a?.id)}
-                          onChange={(e) => handleStatusChange(a, e.target.value)}
-                          className="rounded-lg border border-zinc-300 bg-transparent px-2 py-1 text-[10px] font-bold uppercase"
-                        >
-                          <option value="applied" disabled>Applied</option>
-                          <option value="shortlisted">Shortlist</option>
-                          <option value="interview">Interview</option>
-                          <option value="selected">Select</option>
-                          <option value="rejected">Reject</option>
-                        </select>
                       </div>
                       <div className="mt-2 flex items-center justify-end gap-1">
-                        <button type="button" onClick={() => handleStatusChange(a, 'shortlisted')} className="rounded-md border border-blue-500/30 px-2 py-1 text-[9px] font-black uppercase text-blue-500">Shortlist</button>
-                        <button type="button" onClick={() => handleStatusChange(a, 'interview')} className="rounded-md border border-orange-500/30 px-2 py-1 text-[9px] font-black uppercase text-orange-500">Schedule</button>
-                        <button type="button" onClick={() => handleStatusChange(a, 'selected')} className="rounded-md border border-emerald-500/30 px-2 py-1 text-[9px] font-black uppercase text-emerald-500">Select</button>
-                        <button type="button" onClick={() => handleStatusChange(a, 'rejected')} className="rounded-md border border-red-500/30 px-2 py-1 text-[9px] font-black uppercase text-red-500">Reject</button>
+                        {updatingId === (a?._id || a?.id) ? (
+                           <span className="text-[10px] font-bold animate-pulse text-indigo-500">Updating...</span>
+                        ) : (
+                          <>
+                            {a?.status !== 'shortlisted' && <button type="button" onClick={() => handleStatusChange(a, 'shortlisted')} className="rounded-md border border-blue-500/30 px-2 py-1 text-[9px] font-black uppercase text-blue-500 hover:bg-blue-500/10 active:scale-95 transition-all">Shortlist</button>}
+                            {a?.status !== 'interview' && <button type="button" onClick={() => handleStatusChange(a, 'interview')} className="rounded-md border border-orange-500/30 px-2 py-1 text-[9px] font-black uppercase text-orange-500 hover:bg-orange-500/10 active:scale-95 transition-all">Schedule</button>}
+                            {a?.status !== 'selected' && <button type="button" onClick={() => handleStatusChange(a, 'selected')} className="rounded-md border border-emerald-500/30 px-2 py-1 text-[9px] font-black uppercase text-emerald-500 hover:bg-emerald-500/10 active:scale-95 transition-all">Select</button>}
+                            {a?.status !== 'rejected' && <button type="button" onClick={() => handleStatusChange(a, 'rejected')} className="rounded-md border border-red-500/30 px-2 py-1 text-[9px] font-black uppercase text-red-500 hover:bg-red-500/10 active:scale-95 transition-all">Reject</button>}
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

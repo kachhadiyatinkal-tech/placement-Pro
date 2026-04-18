@@ -32,7 +32,7 @@ router.get('/all-users', AllUsersLen);
 
 router.get('/:userId', authenticateToken, UserData);
 
-router.post('/upload-photo', uploadUserProfile.single('profileImgs'), UpdatePhoto);
+router.post('/upload-photo', authenticateToken, uploadUserProfile.single('profileImgs'), UpdatePhoto);
 
 router.post('/update-profile', authenticateToken, UpdateProfile);
 

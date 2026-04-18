@@ -21,6 +21,9 @@ const mongodb = require('./config/MongoDB');
 mongodb();
 
 
+// routes for auth (forgot/reset password)
+app.use('/auth', require('./routes/auth.route'));
+
 // routes for user
 app.use('/api/v1/user', require('./routes/user.route'));
 // routes for student user

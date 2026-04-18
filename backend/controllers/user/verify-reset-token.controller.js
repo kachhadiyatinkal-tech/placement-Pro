@@ -1,5 +1,6 @@
 const User = require("../../models/user.model");
-const jwt = require('jsonwebtoken');
+const Company = require("../../models/company.model");
+const crypto = require('crypto');
 const { sendError, sendSuccess } = require("../../utils/apiResponse");
 
 const VerifyResetToken = async (req, res) => {
@@ -10,29 +11,31 @@ const VerifyResetToken = async (req, res) => {
       return sendError(res, 400, "Validation failed", { token: "Reset token is required" });
     }
 
-    // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Hash incoming token using SHA256
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
     // Check if user exists and token hasn't expired
-    const user = await User.findOne({
-      _id: decoded.userId,
-      email: decoded.email,
-      resetToken: token,
-      resetTokenExpiry: { $gt: Date.now() }
+    let account = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() }
     });
+    
+    if (!account) {
+      account = await Company.findOne({
+        resetPasswordToken: hashedToken,
+        resetPasswordExpires: { $gt: Date.now() }
+      });
+    }
 
-    if (!user) {
-      return sendError(res, 400, "Validation failed", { token: "Invalid or expired reset token" });
+    if (!account) {
+      return sendError(res, 400, "Invalid or expired token");
     }
 
     return sendSuccess(res, 200, { message: "Token is valid" });
 
   } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      return sendError(res, 400, "Validation failed", { token: "Reset token has expired" });
-    }
     console.log("verify-reset-token.controller.js => ", error);
-    return sendError(res, 400, "Validation failed", { token: "Invalid reset token" });
+    return sendError(res, 500, "Internal server error");
   }
 }
 

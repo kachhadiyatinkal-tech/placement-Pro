@@ -748,32 +748,10 @@ export default function Applicants() {
                       </button>
                     </td>
                     <td className="px-8 py-5 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-2 text-right">
                         <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${statusClasses(a?.status)}`}>
                           {a?.status?.replace('_', ' ') || 'Applied'}
                         </span>
-                        <select
-                          value={a?.status || 'applied'}
-                          disabled={updatingId === appId}
-                          onChange={(e) => handleStatusChange(a, e.target.value)}
-                          className={`rounded-lg border px-2 py-1 text-[10px] font-black uppercase ${isDark ? 'border-stone-700 bg-stone-800 text-stone-100' : 'border-stone-300 bg-white text-stone-900'
-                            }`}
-                        >
-                          <option value="applied" disabled>Applied</option>
-                          <option value="under_review">Review</option>
-                          <option value="shortlisted">Shortlist</option>
-                          <option value="interview">Interview</option>
-                          <option value="selected">Select</option>
-                          <option value="rejected">Reject</option>
-                        </select>
-                      </div>
-
-                      <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
-                        <button type="button" onClick={() => handleStatusChange(a, 'under_review')} className="rounded-md border border-purple-500/30 px-2 py-1 text-[9px] font-black uppercase text-purple-500 hover:bg-purple-500 hover:text-white transition-colors">Review</button>
-                        <button type="button" onClick={() => handleStatusChange(a, 'shortlisted')} className="rounded-md border border-blue-500/30 px-2 py-1 text-[9px] font-black uppercase text-blue-500 hover:bg-blue-500 hover:text-white transition-colors">Shortlist</button>
-                        <button type="button" onClick={() => handleStatusChange(a, 'interview')} className="rounded-md border border-orange-500/30 px-2 py-1 text-[9px] font-black uppercase text-orange-500 hover:bg-orange-500 hover:text-white transition-colors flex items-center gap-1"><Calendar size={10} /> Schedule</button>
-                        <button type="button" onClick={() => handleStatusChange(a, 'selected')} className="rounded-md border border-emerald-500/30 px-2 py-1 text-[9px] font-black uppercase text-emerald-500 hover:bg-emerald-500 hover:text-white transition-colors">Select</button>
-                        <button type="button" onClick={() => handleStatusChange(a, 'rejected')} className="rounded-md border border-red-500/30 px-2 py-1 text-[9px] font-black uppercase text-red-500 hover:bg-red-500 hover:text-white transition-colors">Reject</button>
                       </div>
 
                       {isSelected && (

@@ -4,12 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { Clock, CheckSquare, ArrowRight, AlertTriangle, Zap } from 'lucide-react';
 import { api } from '../../services/axios';
 import Loader from '../../components/Loader';
+import { toastError } from '../../utils/toast';
 
 export default function PracticeTest() {
     const navigate = useNavigate();
-    const isDark = useSelector((s) => s.theme?.isDark ?? true);
+    const mode = useSelector((s) => s.theme?.mode || 'light');
+    const isDark = mode === 'dark';
     const user = useSelector((s) => s.auth.user);
-    const userId = user?._id || user?.id;
+    // Fallback to localStorage if Redux user not yet hydrated
+    const userId = user?._id || user?.id || localStorage.getItem('studentId');
 
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -19,6 +22,18 @@ export default function PracticeTest() {
     const [testStarted, setTestStarted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
+        const handleSubmit = useCallback(async () => {
+        if (submitting) return;
+
+        if (!userId) {
+            toastError('Session error: could not identify user. Please refresh and try again.');
+            return;
+        }
+
+        if (Object.keys(answers).length === 0) {
+            toastError('Please answer at least one question before submitting.');
+            return;
+        }
     useEffect(() => {
         if (testStarted && timeLeft > 0) {
             const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
@@ -26,23 +41,32 @@ export default function PracticeTest() {
         } else if (timeLeft === 0 && testStarted) {
             handleSubmit();
         }
-    }, [testStarted, timeLeft]);
+    }, [testStarted, timeLeft, handleSubmit]);
 
+    
     const fetchQuestions = async (category = '') => {
         setLoading(true);
         try {
             const { data } = await api.get(`/api/test/questions?limit=10${category ? `&category=${category}` : ''}`);
+            if (!data.questions || data.questions.length === 0) {
+                toastError('No questions found for this category. Try another category.');
+                return;
+            }
             setQuestions(data.questions);
+            setAnswers({});
+            setCurrentIdx(0);
+            setTimeLeft(600);
             setTestStarted(true);
         } catch (error) {
             console.error("Fetch questions error:", error);
+            toastError(error?.response?.data?.msg || 'Failed to load questions. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSubmit = useCallback(async () => {
-        if (submitting) return;
+
+
         setSubmitting(true);
 
         const formattedAnswers = Object.entries(answers).map(([id, opt]) => ({
@@ -58,8 +82,7 @@ export default function PracticeTest() {
             navigate('/student/test-results', { state: { result: data.result } });
         } catch (error) {
             console.error("Submit test error:", error);
-            alert("Failed to submit test. Please try again.");
-        } finally {
+            toastError(error?.response?.data?.msg || 'Failed to submit test. Please try again.');
             setSubmitting(false);
         }
     }, [answers, userId, navigate, submitting]);

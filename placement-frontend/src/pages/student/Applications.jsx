@@ -17,7 +17,8 @@ export default function Applications() {
   const dispatch = useDispatch()
   const user = useSelector((s) => s.auth.user)
   const { applications, loading } = useSelector((s) => s.applications)
-  const isDark = useSelector((s) => s.theme?.isDark ?? true)
+  const mode = useSelector((s) => s.theme?.mode || 'light')
+  const isDark = mode === 'dark'
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
 
@@ -34,7 +35,7 @@ export default function Applications() {
   }, [applications, currentPage, itemsPerPage])
 
   const handleRespond = (id, isAccepted) => {
-    if(window.confirm(`Are you sure you want to ${isAccepted ? 'ACCEPT' : 'REJECT'} this offer?`)) {
+    if (window.confirm(`Are you sure you want to ${isAccepted ? 'ACCEPT' : 'REJECT'} this offer?`)) {
       dispatch(respondToOffer({ id, isAccepted }))
     }
   }
@@ -49,9 +50,8 @@ export default function Applications() {
     return 0;
   }
 
-  const cardStyle = `rounded-2xl border transition-all duration-300 p-6 ${
-    isDark ? 'border-stone-800 bg-stone-900/50 backdrop-blur-md' : 'border-stone-100 bg-white shadow-xl shadow-stone-200/50'
-  }`
+  const cardStyle = `rounded-2xl border transition-all duration-300 p-6 ${isDark ? 'border-stone-800 bg-stone-900/50 backdrop-blur-md' : 'border-stone-100 bg-white shadow-xl shadow-stone-200/50'
+    }`
 
   return (
     <div className={`space-y-8 p-2 ${isDark ? 'text-stone-100' : 'text-stone-900'}`}>
@@ -76,12 +76,12 @@ export default function Applications() {
 
       {!applications?.length && !isLoading && (
         <div className={`${cardStyle} flex flex-col items-center justify-center py-20`}>
-           <div className="h-16 w-16 rounded-3xl bg-stone-50 dark:bg-stone-800 flex items-center justify-center text-stone-400 mb-4">
-             <Clock size={32} />
-           </div>
-           <p className="text-xs font-black uppercase tracking-widest text-stone-500">
-             No active applications found
-           </p>
+          <div className="h-16 w-16 rounded-3xl bg-stone-50 dark:bg-stone-800 flex items-center justify-center text-stone-400 mb-4">
+            <Clock size={32} />
+          </div>
+          <p className="text-xs font-black uppercase tracking-widest text-stone-500">
+            No active applications found
+          </p>
         </div>
       )}
 
@@ -93,7 +93,7 @@ export default function Applications() {
           const currentStepIdx = getStepIndex(statusStr);
           const companyName = app?.jobId?.company?.companyName || app?.companyId?.companyName || 'Unknown Company';
           const roleName = app?.jobId?.jobTitle || 'Unspecified Role';
-          
+
           return (
             <div key={app._id} className={cardStyle}>
               {/* Header */}
@@ -108,12 +108,11 @@ export default function Applications() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                    isRejected ? 'bg-red-500/10 text-red-500 border-red-500/20' :
-                    isSelected ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                    currentStepIdx >= 3 ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                    'bg-stone-500/10 text-stone-500 border-stone-500/20'
-                  }`}>
+                  <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${isRejected ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                      isSelected ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                        currentStepIdx >= 3 ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                          'bg-stone-500/10 text-stone-500 border-stone-500/20'
+                    }`}>
                     <span className="h-1.5 w-1.5 rounded-full bg-current" />
                     {statusStr.replace('_', ' ')}
                   </span>
@@ -123,59 +122,77 @@ export default function Applications() {
               {/* Timeline */}
               <div className="relative mb-8">
                 <div className="absolute top-1/2 left-0 w-full h-1 bg-stone-200 dark:bg-stone-800 -translate-y-1/2 rounded-full overflow-hidden">
-                   <div 
-                     className={`h-full transition-all duration-1000 ${isRejected ? 'bg-red-500' : 'bg-indigo-500'}`}
-                     style={{ width: `${(currentStepIdx / (TIMELINE_STEPS.length - 1)) * 100}%` }}
-                   />
+                  <div
+                    className={`h-full transition-all duration-1000 ${isRejected ? 'bg-red-500' : 'bg-indigo-500'}`}
+                    style={{ width: `${(currentStepIdx / (TIMELINE_STEPS.length - 1)) * 100}%` }}
+                  />
                 </div>
                 <div className="relative flex justify-between">
                   {TIMELINE_STEPS.map((step, idx) => {
                     const isCompleted = idx <= currentStepIdx;
                     const isLastStepAndRejected = idx === 4 && isRejected;
-                    
+
                     return (
-                    <div key={step.key} className="flex flex-col items-center gap-2">
-                       <div className={`w-6 h-6 rounded-full border-4 flex items-center justify-center z-10 transition-colors duration-500
+                      <div key={step.key} className="relative flex flex-col items-center gap-2">
+                        <div className={`w-6 h-6 rounded-full border-4 flex items-center justify-center z-10 transition-colors duration-500
                          ${isDark ? 'bg-stone-900 border-stone-900' : 'bg-white border-white'}
                          ${isCompleted ? (isLastStepAndRejected ? '!bg-red-500 text-white' : '!bg-indigo-500 text-white') : 'bg-stone-200 dark:bg-stone-800'}
                        `}>
                           {isCompleted ? <CheckCircle size={14} className="opacity-0" /> : null}
-                       </div>
-                       <span className={`text-[9px] font-black uppercase tracking-wider absolute top-8 text-center w-24 -ml-12 ${isCompleted ? (isLastStepAndRejected ? 'text-red-500' : 'text-indigo-500') : 'text-stone-500'}`}>
-                         {idx === 4 ? (isRejected ? 'Rejected' : isSelected ? 'Selected' : step.label) : step.label}
-                       </span>
-                    </div>
-                  )})}
+                        </div>
+                        <span className={`text-[9px] font-black uppercase tracking-wider absolute top-8 w-24
+                         ${idx === 0 ? 'left-0 text-left' : idx === TIMELINE_STEPS.length - 1 ? 'right-0 text-right' : 'left-1/2 -translate-x-1/2 text-center'}
+                         ${isCompleted ? (isLastStepAndRejected ? 'text-red-500' : 'text-indigo-500') : 'text-stone-500'}
+                       `}>
+                          {idx === 4 ? (isRejected ? 'Rejected' : isSelected ? 'Selected' : step.label) : step.label}
+                        </span>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
 
               {/* Bottom Actions & Info */}
               <div className="mt-12 flex flex-wrap gap-4 items-center justify-between border-t border-stone-200 dark:border-stone-800 pt-6">
-                <div className="flex gap-6">
-                  {/* Interview Info */}
-                  {app.interviewDate ? (
-                    <div className="flex items-center gap-2 text-sm text-stone-500">
-                      <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500"><Calendar size={16} /></div>
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Interview Scheduled</span>
-                        <span className="font-bold">{new Date(app.interviewDate).toLocaleDateString()} {app.interviewDetails?.time ? `at ${app.interviewDetails.time}` : ''}</span>
+                <div className="flex flex-col gap-4">
+                  {/* Dedicated Interview Section when Status is Interview */}
+                  {(statusStr === 'interview' || app.interviewDate || app.interviewDetails?.date) && (
+                    <div className={`p-4 rounded-2xl border ${isDark ? 'bg-indigo-500/5 border-indigo-500/20' : 'bg-indigo-50 border-indigo-100'} flex flex-wrap gap-6 items-center`}>
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                          <Calendar size={20} />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-black uppercase tracking-[0.1em] text-indigo-500">Interview Date & Time</span>
+                          <span className="text-sm font-bold">
+                            {(app.interviewDate || app.interviewDetails?.date)
+                              ? new Date(app.interviewDate || app.interviewDetails.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                              : 'Date TBD'}
+                            {app.interviewDetails?.time ? ` at ${app.interviewDetails.time}` : ''}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ) : null}
 
-                  {app.interviewLink ? (
-                      <a href={app.interviewLink} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-blue-500 hover:text-blue-600 font-bold transition-colors">
-                        <div className="p-2 rounded-lg bg-blue-500/10"><LinkIcon size={16} /></div>
-                        Join Meeting Link
-                      </a>
-                  ) : null}
-                  
-                  {app.interviewDetails?.meetingLink && !app.interviewLink ? (
-                      <a href={app.interviewDetails.meetingLink} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-blue-500 hover:text-blue-600 font-bold transition-colors">
-                        <div className="p-2 rounded-lg bg-blue-500/10"><LinkIcon size={16} /></div>
-                        Join Meeting Link
-                      </a>
-                  ) : null}
+                      {(app.interviewLink || app.interviewDetails?.meetingLink) && (
+                        <div className="flex items-center gap-3 border-l border-indigo-200 dark:border-indigo-800 pl-6 ml-auto sm:ml-0">
+                          <div className="h-10 w-10 rounded-xl bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/20">
+                            <LinkIcon size={20} />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-black uppercase tracking-[0.1em] text-blue-500">Meeting Link</span>
+                            <a
+                              href={app.interviewLink || app.interviewDetails.meetingLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-sm font-bold text-blue-600 hover:underline flex items-center gap-1"
+                            >
+                              Join Interview <ExternalLink size={12} />
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Offer Letter & Actions */}
@@ -188,12 +205,12 @@ export default function Applications() {
 
                   {isSelected && app.offerLetter && app.isAccepted === null && (
                     <div className="flex gap-2">
-                       <button onClick={() => handleRespond(app._id, true)} className="flex items-center gap-1 px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/30">
-                         <Check size={14} /> Accept Offer
-                       </button>
-                       <button onClick={() => handleRespond(app._id, false)} className="flex items-center gap-1 px-4 py-2 bg-red-500 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-600 transition-colors shadow-lg shadow-red-500/30">
-                         <X size={14} /> Decline
-                       </button>
+                      <button onClick={() => handleRespond(app._id, true)} className="flex items-center gap-1 px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/30">
+                        <Check size={14} /> Accept Offer
+                      </button>
+                      <button onClick={() => handleRespond(app._id, false)} className="flex items-center gap-1 px-4 py-2 bg-red-500 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-600 transition-colors shadow-lg shadow-red-500/30">
+                        <X size={14} /> Decline
+                      </button>
                     </div>
                   )}
 

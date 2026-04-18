@@ -1,5 +1,6 @@
 const User = require("../../models/user.model");
-const jwt = require('jsonwebtoken');
+const Company = require("../../models/company.model");
+const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const { sendError, sendSuccess } = require("../../utils/apiResponse");
 
@@ -16,36 +17,45 @@ const ResetPassword = async (req, res) => {
       });
     }
 
-    // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Hash incoming token using SHA256
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-    // Check if user exists and token is valid
-    const user = await User.findOne({
-      _id: decoded.userId,
-      email: decoded.email,
-      resetToken: token,
-      resetTokenExpiry: { $gt: Date.now() }
+    // Find user with matching token and expiry > now
+    let account = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() }
     });
 
-    if (!user) {
-      return sendError(res, 400, "Validation failed", { token: "Invalid or expired reset token" });
+    if (!account) {
+      account = await Company.findOne({
+        resetPasswordToken: hashedToken,
+        resetPasswordExpires: { $gt: Date.now() }
+      });
     }
 
-    // Hash the new password
+    if (!account) {
+      return sendError(res, 400, "Invalid or expired token");
+    }
+
+    // Hash password using bcrypt
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Update user password and clear reset token
-    user.password = hashedPassword;
-    user.resetToken = undefined;
-    user.resetTokenExpiry = undefined;
-    await user.save();
+    // Update password
+    account.password = hashedPassword;
+    
+    // Remove resetPasswordToken and resetPasswordExpires
+    account.resetPasswordToken = undefined;
+    account.resetPasswordExpires = undefined;
+    
+    // Also clear old fields if they exist (only for user, but safe to set on company too)
+    account.resetToken = undefined;
+    account.resetTokenExpiry = undefined;
 
-    return sendSuccess(res, 200, { message: "Password reset successfully" });
+    await account.save();
+
+    return sendSuccess(res, 200, { message: "Password reset successful" });
 
   } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      return sendError(res, 400, "Validation failed", { token: "Reset token has expired" });
-    }
     console.log("reset-password.controller.js => ", error);
     return sendError(res, 500, "Internal server error");
   }

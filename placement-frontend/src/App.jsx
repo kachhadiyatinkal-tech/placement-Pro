@@ -32,6 +32,7 @@ import ContactPageSettings from './pages/management/ContactPageSettings'
 import AdminStudents from './pages/management/AdminStudents'
 import AdminApplications from './pages/management/AdminApplications'
 import AdminJobs from './pages/management/AdminJobs'
+import AdminSmtpSettings from './pages/management/AdminSmtpSettings'
 import CompanyDashboard from './pages/company/CompanyDashboard'
 import CompanyJobs from './pages/company/CompanyJobs'
 import CompanyApplicants from './pages/company/Applicants'
@@ -108,6 +109,7 @@ export default function App() {
               <Route path="/admin/notices" element={<AdminNotices />} />
               <Route path="/admin/chatbot-settings" element={<AdminChatbotSettings />} />
               <Route path="/admin/contact-page" element={<ContactPageSettings />} />
+              <Route path="/admin/smtp-settings" element={<AdminSmtpSettings />} />
               <Route path="/admin/profile" element={<Profile />} />
 
               <Route path="/company/dashboard" element={<CompanyDashboard />} />

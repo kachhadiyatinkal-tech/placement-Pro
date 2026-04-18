@@ -96,6 +96,7 @@ export default function AdminDashboard() {
           <Card to="/admin/applications" icon={Briefcase} label="Pipeline Audit" desc="Review active job applications and download applicant metrics." />
           <Card to="/admin/chatbot-settings" icon={MessageCircle} label="Chatbot UI" desc="Customize the floating assistant: visibility, branding, layout, and copy." />
           <Card to="/admin/contact-page" icon={Mail} label="Contact page" desc="Edit public contact details, hours, and sidebar copy shown on /contact." />
+          <Card to="/admin/smtp-settings" icon={Shield} label="Email Infrastructure" desc="Configure SMTP credentials, enable/disable system emails, and manage outgoing mail." />
         </div>
       </div>
 

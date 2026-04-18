@@ -1,5 +1,7 @@
 const CompanySchema = require("../../models/company.model");
+const JobSchema = require("../../models/job.model");
 const bcrypt = require("bcrypt");
+const { isApplicationDeadlinePassed } = require("../../utils/jobDeadline");
 
 
 const AddCompany = async (req, res) => {
@@ -135,6 +137,24 @@ const UploadCompanyLogo = async (req, res) => {
 }
 
 
+const GetMyJobs = async (req, res) => {
+  try {
+    const companyId = req.user?._id
+    if (!companyId) return res.status(401).json({ msg: 'Unauthorized' })
+    const jobs = await JobSchema.find({ company: companyId })
+      .populate('company', 'companyName companyLocation companyWebsite')
+      .lean()
+    const data = jobs.map((j) => ({
+      ...j,
+      applicationClosed: isApplicationDeadlinePassed(j.applicationDeadline),
+    }))
+    return res.json({ data })
+  } catch (error) {
+    console.log('company.all-company.controller.js = GetMyJobs => ', error)
+    return res.status(500).json({ msg: 'Server Error' })
+  }
+}
+
 module.exports = {
   AddCompany,
   CompanyDetail,
@@ -143,4 +163,5 @@ module.exports = {
   CompanyMyProfile,
   UpdateCompanyProfile,
   UploadCompanyLogo,
+  GetMyJobs,
 };
