@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>Password Reset</title>
+  <title>Application Status Updated</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style type="text/css">
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
@@ -44,22 +44,40 @@
       margin-bottom: 24px;
       font-size: 16px;
     }
-    .button-container {
-      text-align: center;
-      margin: 32px 0;
-    }
-    .button {
-      background-color: #4f46e5;
-      color: #ffffff !important;
-      padding: 16px 32px;
-      border-radius: 12px;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .status-badge {
       display: inline-block;
-      box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+      padding: 8px 16px;
+      background-color: #fef3c7;
+      color: #92400e;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 24px;
+    }
+    .status-updated {
+      background-color: #e0e7ff;
+      color: #4338ca;
+    }
+    .job-card {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 24px;
+      margin: 24px 0;
+    }
+    .job-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 8px 0;
+    }
+    .company-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #6366f1;
+      margin: 0;
     }
     .footer {
       padding: 24px;
@@ -76,11 +94,6 @@
       background-color: #e2e8f0;
       margin: 24px 0;
     }
-    .link-alt {
-      word-break: break-all;
-      color: #6366f1;
-      font-size: 12px;
-    }
   </style>
 </head>
 <body>
@@ -89,19 +102,32 @@
       <h1>PLACEMENTPRO</h1>
     </div>
     <div class="content">
-      <p>Hello,</p>
-      <p>We received a request to reset the password for your account. If you didn't make this request, you can safely ignore this email.</p>
+      <p>Hello <strong>{{studentName}}</strong>,</p>
+      <p>Your application status for the following position has been updated.</p>
       
-      <div class="button-container">
-        <a href="{{resetUrl}}" class="button">Reset Password</a>
+      <div class="status-badge status-updated">New Status: {{newStatus}}</div>
+
+      <div class="job-card">
+        <h2 class="job-title">{{jobTitle}}</h2>
+        <p class="company-name">{{companyName}}</p>
       </div>
 
-      <p>This link will expire in <strong>15 minutes</strong> for your security.</p>
+      {{#if isInterview}}
+      <p><strong>Interview Details:</strong></p>
+      <ul>
+        {{#if interviewDate}}<li>Date: {{interviewDate}}</li>{{/if}}
+        {{#if interviewTime}}<li>Time: {{interviewTime}}</li>{{/if}}
+        {{#if meetingLink}}<li>Meeting Link: <a href="{{meetingLink}}">{{meetingLink}}</a></li>{{/if}}
+      </ul>
+      {{/if}}
+
+      <p>You can view more details and track your application journey through your student dashboard.</p>
+      
+      <p>Best regards,<br>The Recruitment Team</p>
       
       <div class="divider"></div>
       
-      <p style="font-size: 12px; color: #64748b;">If the button above doesn't work, copy and paste this link into your browser:</p>
-      <p class="link-alt">{{resetUrl}}</p>
+      <p style="font-size: 12px; color: #64748b;">This is an automated notification. You don't need to reply to this email.</p>
     </div>
     <div class="footer">
       <p>&copy; 2026 PLACEMENTPRO Suite</p>

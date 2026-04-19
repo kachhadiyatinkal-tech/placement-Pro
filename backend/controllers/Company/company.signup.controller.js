@@ -37,7 +37,8 @@ module.exports = async function companySignup(req, res) {
       companyDifficulty: companyDifficulty || 'Moderate',
       email: String(email).trim().toLowerCase(),
       password: hash,
-      isActive: true,
+      isActive: false,
+      registrationStatus: 'pending',
     })
 
     await company.save()

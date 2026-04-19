@@ -15,6 +15,7 @@ const {
   UpdateCompanyProfile,
   UploadCompanyLogo,
   GetMyJobs,
+  UpdateCompanyRegistrationStatus,
 } = require('../controllers/Company/company.all-company.controller')
 const companyLogin = require('../controllers/Company/company.login.controller')
 const companySignup = require('../controllers/Company/company.signup.controller')
@@ -33,6 +34,7 @@ router.get('/company-detail', authenticateToken, AllCompanyDetail)
 router.post('/add-company', authenticateToken, AddCompany)
 
 router.post('/delete-company', authenticateToken, DeleteCompany)
+router.post('/update-registration-status', authenticateToken, UpdateCompanyRegistrationStatus)
 
 router.get('/company-data', CompanyDetail)
 router.get('/my-profile', authenticateToken, CompanyMyProfile)

@@ -12,6 +12,7 @@ const companySchema = new Schema({
   email: { type: String, trim: true, sparse: true },
   password: { type: String },
   isActive: { type: Boolean, default: true },
+  registrationStatus: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'accepted' },
   token: { type: String },
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date }

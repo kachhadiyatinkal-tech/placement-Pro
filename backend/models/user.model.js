@@ -81,7 +81,7 @@ const UserSchema = new mongoose.Schema({
         // Reference to job posting
         jobId: { type: mongoose.Schema.Types.ObjectId, ref: 'Job' },
         // Track application status
-        status: { type: String, enum: ['applied', 'interview', 'hired', 'rejected'], default: 'applied' },
+        status: { type: String, enum: ['pending', 'applied', 'interview', 'hired', 'rejected'], default: 'pending' },
         package: { type: Number },
         appliedAt: { type: Date, default: Date.now },
         coverLetter: { type: String, trim: true },

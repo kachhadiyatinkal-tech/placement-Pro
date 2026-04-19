@@ -74,6 +74,7 @@ function ApplicantModal({ applicant, isDark, onClose }) {
   const interviewDate = iDate ? new Date(iDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }) : null
 
   const statusColors = {
+    pending: 'bg-stone-500/10 text-stone-400 border-stone-500/20',
     applied: 'bg-stone-500/10 text-stone-400 border-stone-500/20',
     under_review: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
     shortlisted: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -81,8 +82,8 @@ function ApplicantModal({ applicant, isDark, onClose }) {
     selected: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     rejected: 'bg-red-500/10 text-red-400 border-red-500/20',
   }
-  const statusKey = String(applicant?.status || 'applied').toLowerCase()
-  const statusClass = statusColors[statusKey] || statusColors.applied
+  const statusKey = String(applicant?.status || 'pending').toLowerCase()
+  const statusClass = statusColors[statusKey] || statusColors.pending
 
   return (
     <div
@@ -128,7 +129,7 @@ function ApplicantModal({ applicant, isDark, onClose }) {
           {/* Status badge */}
           <div className="relative mt-4 flex items-center gap-3">
             <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${statusClass}`}>
-              {(applicant?.status || 'applied').replace('_', ' ')}
+              {(applicant?.status || 'pending').replace('_', ' ')}
             </span>
             <span className="text-white/50 text-[10px] uppercase tracking-widest">Applied on {appliedAt}</span>
           </div>
@@ -428,8 +429,8 @@ export default function Applicants() {
   }, [jobId])
 
   const statusClasses = (status) => {
-    const s = String(status || 'applied').toLowerCase()
-    if (s === 'applied') return 'bg-stone-500/10 text-stone-500 border-stone-500/20'
+    const s = String(status || 'pending').toLowerCase()
+    if (s === 'pending' || s === 'applied') return 'bg-stone-500/10 text-stone-500 border-stone-500/20'
     if (s === 'under_review') return 'bg-purple-500/10 text-purple-500 border-purple-500/20'
     if (s === 'shortlisted') return 'bg-blue-500/10 text-blue-500 border-blue-500/20'
     if (s === 'interview') return 'bg-orange-500/10 text-orange-500 border-orange-500/20'
@@ -532,7 +533,7 @@ export default function Applicants() {
       const studentName = a?.name || `${student?.first_name || ''} ${student?.last_name || ''}`.trim() || '—'
       const email = a?.email || student?.email || '—'
       const { jobTitle, company } = resolveJobInfo(a)
-      const status = (a?.status || 'applied').replace('_', ' ').toUpperCase()
+      const status = (a?.status || 'pending').replace('_', ' ').toUpperCase()
       const appliedAt = a?.createdAt
         ? new Date(a.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
         : '—'
@@ -750,7 +751,7 @@ export default function Applicants() {
                     <td className="px-8 py-5 text-right">
                       <div className="flex items-center justify-end gap-2 text-right">
                         <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${statusClasses(a?.status)}`}>
-                          {a?.status?.replace('_', ' ') || 'Applied'}
+                          {a?.status?.replace('_', ' ') || 'Pending'}
                         </span>
                       </div>
 

@@ -26,7 +26,7 @@ const jobSchema = new mongoose.Schema({
       selectionDate: { type: Date },
       joiningDate: { type: Date },
       offerLetter: { type: String },
-      status: { type: String, enum: ['applied', 'interview', 'hired', 'rejected'], default: 'applied' },
+      status: { type: String, enum: ['pending', 'applied', 'interview', 'hired', 'rejected'], default: 'pending' },
       appliedAt: { type: Date, default: Date.now }
     }
   ]

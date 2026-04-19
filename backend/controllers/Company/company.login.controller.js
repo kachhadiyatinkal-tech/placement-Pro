@@ -21,6 +21,12 @@ module.exports = async function companyLogin(req, res) {
     if (!company || !company.password) {
       return res.status(401).json({ message: 'Invalid credentials.' })
     }
+    if (company.registrationStatus === 'pending') {
+      return res.status(403).json({ message: 'Your account is pending approval. Please wait for the admin to verify your registration.' })
+    }
+    if (company.registrationStatus === 'rejected') {
+      return res.status(403).json({ message: 'Your account registration has been rejected. Please contact admin for details.' })
+    }
     if (company.isActive === false) {
       return res.status(403).json({ message: 'Company account is deactivated. Please contact admin.' })
     }

@@ -6,7 +6,7 @@ import { Clock, CheckCircle, XCircle, Briefcase, ExternalLink, Calendar, Link as
 import Pagination from '../../components/common/Pagination'
 
 const TIMELINE_STEPS = [
-  { key: 'applied', label: 'Applied' },
+  { key: 'pending', label: 'Pending' },
   { key: 'under_review', label: 'Under Review' },
   { key: 'shortlisted', label: 'Shortlisted' },
   { key: 'interview', label: 'Interview' },
@@ -42,7 +42,7 @@ export default function Applications() {
 
   const getStepIndex = (status) => {
     const s = String(status).toLowerCase();
-    if (s === 'applied') return 0;
+    if (s === 'pending' || s === 'applied') return 0;
     if (s === 'under_review') return 1;
     if (s === 'shortlisted') return 2;
     if (s === 'interview') return 3;
@@ -87,7 +87,7 @@ export default function Applications() {
 
       <div className="space-y-6">
         {paginatedApplications.map((app) => {
-          const statusStr = app.status || 'applied';
+          const statusStr = app.status || 'pending';
           const isRejected = statusStr === 'rejected';
           const isSelected = statusStr === 'selected';
           const currentStepIdx = getStepIndex(statusStr);

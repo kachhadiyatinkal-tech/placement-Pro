@@ -2,6 +2,7 @@ const CompanySchema = require("../../models/company.model");
 const JobSchema = require("../../models/job.model");
 const bcrypt = require("bcrypt");
 const { isApplicationDeadlinePassed } = require("../../utils/jobDeadline");
+const { enqueueEmail } = require('../../services/email.queue');
 
 
 const AddCompany = async (req, res) => {
@@ -33,6 +34,23 @@ const AddCompany = async (req, res) => {
 
     const newcmp = new CompanySchema(payload);
     await newcmp.save();
+
+    // Send welcome email for manually added company
+    if (email) {
+      enqueueEmail({
+        email,
+        subject: 'Welcome to PLACEMENTPRO',
+        template: 'companyStatus',
+        templateData: {
+          companyName,
+          status: 'ACCEPTED',
+          isAccepted: true,
+          loginUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/company/login`,
+          year: new Date().getFullYear()
+        },
+        message: `Your company account has been created on PLACEMENTPRO.`
+      }).catch(err => console.log('Failed to queue company welcome email:', err));
+    }
 
     return res.status(201).json({ msg: "Company Created Successfully!", });
   } catch (error) {
@@ -155,6 +173,48 @@ const GetMyJobs = async (req, res) => {
   }
 }
 
+const UpdateCompanyRegistrationStatus = async (req, res) => {
+  try {
+    const { companyId, status } = req.body;
+    if (!companyId || !status) {
+      return res.status(400).json({ msg: 'Company ID and status are required.' });
+    }
+
+    if (!['accepted', 'rejected'].includes(status)) {
+      return res.status(400).json({ msg: 'Invalid status. Must be accepted or rejected.' });
+    }
+
+    const company = await CompanySchema.findById(companyId);
+    if (!company) {
+      return res.status(404).json({ msg: 'Company not found.' });
+    }
+
+    company.registrationStatus = status;
+    company.isActive = (status === 'accepted');
+    await company.save();
+
+    // Send email notification
+    enqueueEmail({
+      email: company.email,
+      subject: `Account Registration ${status.toUpperCase()}`,
+      template: 'companyStatus',
+      templateData: {
+        companyName: company.companyName,
+        status: status.toUpperCase(),
+        isAccepted: status === 'accepted',
+        loginUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/company/login`,
+        year: new Date().getFullYear()
+      },
+      message: `Your account registration has been ${status}.`
+    }).catch(err => console.log('Failed to queue company status email:', err));
+
+    return res.json({ msg: `Company registration ${status} successfully.`, company });
+  } catch (error) {
+    console.log('company.all-company.controller.js = UpdateCompanyRegistrationStatus => ', error);
+    return res.status(500).json({ msg: 'Server Error' });
+  }
+}
+
 module.exports = {
   AddCompany,
   CompanyDetail,
@@ -164,4 +224,5 @@ module.exports = {
   UpdateCompanyProfile,
   UploadCompanyLogo,
   GetMyJobs,
+  UpdateCompanyRegistrationStatus,
 };

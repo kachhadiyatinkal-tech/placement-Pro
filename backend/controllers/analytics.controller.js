@@ -16,6 +16,7 @@ const getOverview = async (req, res) => {
     
     const totalCompanies = await Company.countDocuments();
     const totalJobs = await Job.countDocuments();
+    const totalApplications = await Application.countDocuments();
     
     // Calculate percentage based on distinct users
     const placementPercentage = totalStudents > 0 ? ((totalPlacedStudents / totalStudents) * 100).toFixed(1) : 0;
@@ -26,6 +27,7 @@ const getOverview = async (req, res) => {
       totalPlacedStudents,
       totalCompanies,
       totalJobs,
+      totalApplications,
       placementPercentage: Number(placementPercentage)
     });
   } catch (error) {
@@ -79,20 +81,12 @@ const getPlacementTrends = async (req, res) => {
 const getCompanyStats = async (req, res) => {
   try {
     const companyStats = await Application.aggregate([
-      // Count all applications dynamically
-      {
-        $lookup: {
-          from: 'jobs',
-          localField: 'jobId',
-          foreignField: '_id',
-          as: 'job'
-        }
-      },
-      { $unwind: '$job' },
+      // Only count students who were actually selected/hired
+      { $match: { status: 'selected' } },
       {
         $lookup: {
           from: 'companys', 
-          localField: 'job.company',
+          localField: 'companyId',
           foreignField: '_id',
           as: 'company'
         }
@@ -101,16 +95,16 @@ const getCompanyStats = async (req, res) => {
       {
         $group: {
           _id: '$company.companyName',
-          applicantCount: { $sum: 1 }
+          hiredCount: { $sum: 1 }
         }
       },
-      { $sort: { applicantCount: -1 } },
+      { $sort: { hiredCount: -1 } },
       { $limit: 10 }
     ]);
 
     const formattedStats = companyStats.map(stat => ({
       name: stat._id,
-      count: stat.applicantCount
+      count: stat.hiredCount
     }));
 
     return sendSuccess(res, 200, {
@@ -128,7 +122,8 @@ const getBranchStats = async (req, res) => {
   try {
     // We need to count total students per branch, and placed students per branch
     const branchPlacements = await Application.aggregate([
-      // Dynamically count all students interacting with jobs
+      // Only count students who were actually selected/hired
+      { $match: { status: 'selected' } },
       {
         $lookup: {
           from: 'users',
@@ -141,20 +136,21 @@ const getBranchStats = async (req, res) => {
       {
         $group: {
           _id: '$student.studentProfile.department',
-          placedCount: { $addToSet: '$studentId' } // distinct students engaged per branch
+          placedStudents: { $addToSet: '$studentId' } // distinct students placed per branch
         }
       },
       {
         $project: {
           _id: 1,
-          count: { $size: '$placedCount' }
+          count: { $size: '$placedStudents' }
         }
-      }
+      },
+      { $sort: { count: -1 } }
     ]);
 
-    // Just format it nicely for the pie chart
+    // Format for pie chart
     const formattedStats = branchPlacements.map(stat => ({
-      name: stat._id || 'Unknown',
+      name: stat._id || 'General',
       value: stat.count
     }));
 

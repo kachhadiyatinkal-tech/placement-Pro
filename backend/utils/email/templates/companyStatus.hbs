@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>Password Reset</title>
+  <title>Account Status Updated</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style type="text/css">
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
@@ -44,7 +44,25 @@
       margin-bottom: 24px;
       font-size: 16px;
     }
-    .button-container {
+    .status-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 24px;
+    }
+    .accepted {
+      background-color: #ecfdf5;
+      color: #059669;
+    }
+    .rejected {
+      background-color: #fef2f2;
+      color: #dc2626;
+    }
+    .action-container {
       text-align: center;
       margin: 32px 0;
     }
@@ -76,11 +94,6 @@
       background-color: #e2e8f0;
       margin: 24px 0;
     }
-    .link-alt {
-      word-break: break-all;
-      color: #6366f1;
-      font-size: 12px;
-    }
   </style>
 </head>
 <body>
@@ -89,22 +102,30 @@
       <h1>PLACEMENTPRO</h1>
     </div>
     <div class="content">
-      <p>Hello,</p>
-      <p>We received a request to reset the password for your account. If you didn't make this request, you can safely ignore this email.</p>
+      <p>Hello <strong>{{companyName}}</strong>,</p>
+      <p>Your account registration on PLACEMENTPRO has been reviewed by the administration.</p>
       
-      <div class="button-container">
-        <a href="{{resetUrl}}" class="button">Reset Password</a>
+      <div class="status-badge {{#if isAccepted}}accepted{{else}}rejected{{/if}}">
+        Status: {{status}}
       </div>
 
-      <p>This link will expire in <strong>15 minutes</strong> for your security.</p>
+      {{#if isAccepted}}
+        <p>Congratulations! Your account has been approved. You can now log in to post job opportunities and manage your recruitment process.</p>
+        <div class="action-container">
+          <a href="{{loginUrl}}" class="button">Access Dashboard</a>
+        </div>
+      {{else}}
+        <p>Unfortunately, your account registration has been rejected at this time. If you believe this is a mistake or would like to provide more information, please contact our support team.</p>
+      {{/if}}
+
+      <p>Best regards,<br>The PLACEMENTPRO Team</p>
       
       <div class="divider"></div>
       
-      <p style="font-size: 12px; color: #64748b;">If the button above doesn't work, copy and paste this link into your browser:</p>
-      <p class="link-alt">{{resetUrl}}</p>
+      <p style="font-size: 12px; color: #64748b;">This is an automated notification. You don't need to reply to this email.</p>
     </div>
     <div class="footer">
-      <p>&copy; 2026 PLACEMENTPRO Suite</p>
+      <p>&copy; {{year}} PLACEMENTPRO Suite</p>
       <p>Cloud Infrastructure Active</p>
     </div>
   </div>

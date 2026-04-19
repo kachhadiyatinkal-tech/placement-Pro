@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Download, PenLine, Eye, Plus, Trash, Globe, MapPin, Activity, X } from 'lucide-react'
+import { Download, PenLine, Eye, Plus, Trash, Globe, MapPin, Activity, X, Check } from 'lucide-react'
 import IconButton from '../../components/common/IconButton'
 import Pagination from '../../components/common/Pagination'
 import { fetchCompanies, addCompany, deleteCompany } from '../../features/companies/companiesSlice'
@@ -91,6 +91,16 @@ export default function AdminCompanies() {
       dispatch(fetchCompanies())
     } catch (err) {
       toastError(err?.response?.data?.msg || 'Failed to update status')
+    }
+  }
+
+  async function handleUpdateRegistrationStatus(companyId, status) {
+    try {
+      const res = await adminAPI.updateCompanyRegistrationStatus({ companyId, status })
+      toastSuccess(res.data?.msg || `Company ${status}`)
+      dispatch(fetchCompanies())
+    } catch (err) {
+      toastError(err?.response?.data?.msg || 'Operation failed')
     }
   }
 
@@ -201,16 +211,39 @@ export default function AdminCompanies() {
                   </td>
                   <td className="px-8 py-6">
                     <div className="flex items-center justify-center">
-                      <label className="relative inline-flex cursor-pointer items-center">
-                        <input
-                          type="checkbox"
-                          className="peer sr-only"
-                          checked={c?.isActive !== false}
-                          onChange={() => toggleCompanyActive(c)}
-                        />
-                        <div className={`h-6 w-11 rounded-full transition-all after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-white after:bg-white after:transition-all after:content-[''] peer-checked:bg-brand-500 peer-checked:after:translate-x-full ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'
-                          }`} />
-                      </label>
+                      {c.registrationStatus === 'pending' ? (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleUpdateRegistrationStatus(c._id, 'accepted')}
+                            className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white p-2 rounded-xl border border-emerald-500/20 transition-all active:scale-95"
+                            title="Approve Registration"
+                          >
+                            <Check size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleUpdateRegistrationStatus(c._id, 'rejected')}
+                            className="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white p-2 rounded-xl border border-red-500/20 transition-all active:scale-95"
+                            title="Reject Registration"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      ) : c.registrationStatus === 'rejected' ? (
+                        <span className="px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest bg-red-500/10 text-red-500 border border-red-500/20">
+                          Rejected
+                        </span>
+                      ) : (
+                        <label className="relative inline-flex cursor-pointer items-center">
+                          <input
+                            type="checkbox"
+                            className="peer sr-only"
+                            checked={c?.isActive !== false}
+                            onChange={() => toggleCompanyActive(c)}
+                          />
+                          <div className={`h-6 w-11 rounded-full transition-all after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-white after:bg-white after:transition-all after:content-[''] peer-checked:bg-brand-500 peer-checked:after:translate-x-full ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'
+                            }`} />
+                        </label>
+                      )}
                     </div>
                   </td>
                   <td className="px-8 py-6 text-right">

@@ -7,6 +7,7 @@ const MANAGER_ROLES = ['tpo', 'company', 'admin', 'management', 'superuser'];
 const UPDATABLE_STATUSES = ['under_review', 'shortlisted', 'interview', 'selected', 'rejected'];
 
 const allowedTransitions = {
+  pending: ['under_review', 'shortlisted', 'interview', 'selected', 'rejected'],
   applied: ['under_review', 'shortlisted', 'interview', 'selected', 'rejected'],
   under_review: ['shortlisted', 'interview', 'selected', 'rejected'],
   shortlisted: ['interview', 'selected', 'rejected'],
@@ -76,7 +77,7 @@ const applyToJob = async (req, res) => {
       studentId,
       jobId,
       companyId: job.company,
-      status: 'applied',
+      status: 'pending',
       resume: resume || undefined,
     });
 
@@ -89,7 +90,7 @@ const applyToJob = async (req, res) => {
           $addToSet: {
             'studentProfile.appliedJobs': {
               jobId,
-              status: 'applied',
+              status: 'pending',
               appliedAt: new Date(),
               ...(coverLetter && { coverLetter }),
               ...(phone && { phone }),
@@ -104,7 +105,7 @@ const applyToJob = async (req, res) => {
           $addToSet: {
             applicants: {
               studentId,
-              status: 'applied',
+              status: 'pending',
               appliedAt: new Date(),
             },
           },
@@ -124,7 +125,7 @@ const applyToJob = async (req, res) => {
         jobTitle: job.jobTitle,
         companyName: job.company?.companyName || 'the company'
       },
-      message: `Hello ${student.first_name}, your application for ${job.jobTitle} has been received.`
+      message: `You have successfully applied for this job: ${job.jobTitle}`
     }).catch(err => console.log('Failed to queue application email:', err));
 
     return res.status(201).json({ msg: 'Application submitted successfully.', application });
@@ -264,13 +265,52 @@ const updateApplicationStatus = async (req, res) => {
     }
 
     await application.save();
+
+    // Fetch details for email notification (student email, job title, company name)
+    const updatedApp = await Application.findById(applicationId)
+      .populate({
+        path: 'studentId',
+        select: 'first_name last_name email number profile gender dateOfBirth fullAddress studentProfile',
+      })
+      .populate({
+        path: 'jobId',
+        select: 'jobTitle company',
+        populate: { path: 'company', select: 'companyName' }
+      });
+
+    if (updatedApp && updatedApp.studentId && updatedApp.studentId.email) {
+      const { enqueueEmail } = require('../services/email.queue');
+      
+      const studentName = `${updatedApp.studentId.first_name} ${updatedApp.studentId.last_name}`;
+      const jobTitle = updatedApp.jobId?.jobTitle || 'Unknown Position';
+      const companyName = updatedApp.jobId?.company?.companyName || 'the company';
+      const formattedStatus = status.replace('_', ' ').toUpperCase();
+
+      enqueueEmail({
+        email: updatedApp.studentId.email,
+        subject: `Status Updated: ${jobTitle}`,
+        template: 'statusUpdate',
+        templateData: {
+          studentName,
+          jobTitle,
+          companyName,
+          newStatus: formattedStatus,
+          isInterview: status === 'interview',
+          interviewDate: interviewDetails?.date,
+          interviewTime: interviewDetails?.time,
+          meetingLink: interviewDetails?.meetingLink
+        },
+        message: `Your application status for ${jobTitle} at ${companyName} has been updated to ${formattedStatus}.`
+      }).catch(err => console.log('Failed to queue status update email:', err));
+    }
+
     await syncLegacyStatus({
       studentId: application.studentId,
       jobId: application.jobId,
       status: application.status,
     });
 
-    return res.status(200).json({ msg: 'Application status updated.', data: application });
+    return res.status(200).json({ msg: 'Application status updated.', data: updatedApp });
   } catch (error) {
     console.log('applicationController.updateApplicationStatus => ', error);
     return res.status(500).json({ msg: 'Internal Server Error!' });
@@ -301,6 +341,42 @@ const scheduleInterview = async (req, res) => {
 
     await application.save();
 
+    // Fetch details for email notification
+    const updatedApp = await Application.findById(id)
+      .populate({
+        path: 'studentId',
+        select: 'first_name last_name email number profile gender dateOfBirth fullAddress studentProfile',
+      })
+      .populate({
+        path: 'jobId',
+        select: 'jobTitle company',
+        populate: { path: 'company', select: 'companyName' }
+      });
+
+    if (updatedApp && updatedApp.studentId && updatedApp.studentId.email) {
+      const { enqueueEmail } = require('../services/email.queue');
+      
+      const studentName = `${updatedApp.studentId.first_name} ${updatedApp.studentId.last_name}`;
+      const jobTitleString = updatedApp.jobId?.jobTitle || 'Unknown Position';
+      const companyNameString = updatedApp.jobId?.company?.companyName || 'the company';
+
+      enqueueEmail({
+        email: updatedApp.studentId.email,
+        subject: `Interview Scheduled: ${jobTitleString}`,
+        template: 'statusUpdate',
+        templateData: {
+          studentName,
+          jobTitle: jobTitleString,
+          companyName: companyNameString,
+          newStatus: 'INTERVIEW',
+          isInterview: true,
+          interviewDate: interviewDate,
+          meetingLink: interviewLink
+        },
+        message: `An interview has been scheduled for ${jobTitleString} at ${companyNameString}.`
+      }).catch(err => console.log('Failed to queue interview email:', err));
+    }
+
     // Sync legacy array status
     await syncLegacyStatus({
       studentId: application.studentId,
@@ -308,7 +384,7 @@ const scheduleInterview = async (req, res) => {
       status: application.status,
     });
 
-    return res.status(200).json({ msg: 'Interview scheduled successfully.', data: application });
+    return res.status(200).json({ msg: 'Interview scheduled successfully.', data: updatedApp });
   } catch (error) {
     console.log('applicationController.scheduleInterview => ', error);
     return res.status(500).json({ msg: 'Internal Server Error!' });

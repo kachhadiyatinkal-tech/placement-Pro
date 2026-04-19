@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Users, Download, Search, Mail, Cpu, ExternalLink } from 'lucide-react'
+import { Users, Download, Search, Mail, Cpu, ExternalLink, Eye } from 'lucide-react'
 import { API_BASE_URL } from '../../services/axios'
 import Loader from '../../components/Loader'
+import ScheduleInterviewModal from '../../components/ScheduleInterviewModal'
+import ApplicantDetailModal from '../../components/ApplicantDetailModal'
 import {
   fetchCompanyApplicants,
   fetchCompanyJobs,
@@ -21,6 +23,8 @@ export default function CompanyApplicants() {
   const [applicantsLoading, setApplicantsLoading] = useState(false)
   const [hasFetchedAll, setHasFetchedAll] = useState(false)
   const [updatingId, setUpdatingId] = useState('')
+  const [schedulingApplicant, setSchedulingApplicant] = useState(null)
+  const [viewingApplicant, setViewingApplicant] = useState(null)
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -80,8 +84,8 @@ export default function CompanyApplicants() {
   }
 
   const statusClasses = (status) => {
-    const s = String(status || 'applied').toLowerCase()
-    if (s === 'applied') return 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20'
+    const s = String(status || 'pending').toLowerCase()
+    if (s === 'pending' || s === 'applied') return 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20'
     if (s === 'shortlisted') return 'bg-blue-500/10 text-blue-500 border-blue-500/20'
     if (s === 'interview') return 'bg-orange-500/10 text-orange-500 border-orange-500/20'
     if (s === 'selected') return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
@@ -92,19 +96,32 @@ export default function CompanyApplicants() {
   async function handleStatusChange(app, nextStatus) {
     const applicationId = app?._id || app?.id
     if (!applicationId || !nextStatus) return
-    let interviewDetails
+
     if (nextStatus === 'interview') {
-      const date = window.prompt('Interview date (YYYY-MM-DD):', '')
-      const time = window.prompt('Interview time:', '')
-      const meetingLink = window.prompt('Meeting link:', '')
-      interviewDetails = { date, time, meetingLink }
+      setSchedulingApplicant(app)
+      return
     }
+
     setUpdatingId(applicationId)
-    const result = await dispatch(updateCompanyApplicationStatus({ applicationId, status: nextStatus, interviewDetails }))
+    const result = await dispatch(updateCompanyApplicationStatus({ 
+      applicationId, 
+      status: nextStatus, 
+      interviewDetails: {} 
+    }))
     setUpdatingId('')
-    if (result.meta.requestStatus === 'fulfilled') {
-      if (jobId) dispatch(fetchCompanyApplicants(jobId))
-    }
+  }
+
+  async function onScheduleSubmit(interviewDetails) {
+    if (!schedulingApplicant) return
+    const applicationId = schedulingApplicant?._id || schedulingApplicant?.id
+    setUpdatingId(applicationId)
+    setSchedulingApplicant(null)
+    const result = await dispatch(updateCompanyApplicationStatus({ 
+      applicationId, 
+      status: 'interview', 
+      interviewDetails 
+    }))
+    setUpdatingId('')
   }
 
   return (
@@ -140,7 +157,7 @@ export default function CompanyApplicants() {
               }`}
             >
               <option value="">Select an active job posting...</option>
-              {jobs.map((j) => (
+              {(jobs || []).map((j) => (
                 <option key={j?._id || j?.id} value={j?._id || j?.id}>
                   {j?.jobTitle || j?.title || 'Job'} — {typeof j?.company === 'object' ? j?.company?.companyName : j?.companyName || 'Company'}
                 </option>
@@ -198,29 +215,38 @@ export default function CompanyApplicants() {
                         <div className={`px-3 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest ${
                           isDark ? 'bg-zinc-950 border-zinc-800 text-zinc-400' : 'bg-zinc-50 border-zinc-100 text-zinc-600'
                         }`}>
-                          <Cpu className="inline mr-1" />
-                          {a?.skills || a?.studentSkills || 'Not Specified'}
+                          <Cpu className="inline mr-1" size={10} />
+                          {a?.studentId?.studentProfile?.skills || a?.skills || a?.studentSkills || 'Not Specified'}
                         </div>
                       </div>
                     </td>
                     <td className="px-8 py-6 text-center">
-                      {resumeHref(a) ? (
-                        <a
-                          href={resumeHref(a)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-[10px] font-black uppercase tracking-[0.15em] text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 active:scale-95 transition-all"
+                      <div className="flex items-center justify-center gap-2">
+                        {resumeHref(a) ? (
+                          <a
+                            href={resumeHref(a)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-[10px] font-black uppercase tracking-[0.10em] text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 active:scale-95 transition-all"
+                          >
+                            <ExternalLink size={12} /> Resume
+                          </a>
+                        ) : (
+                          <span className="text-[10px] font-black uppercase tracking-widest opacity-20 italic">No Link</span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setViewingApplicant(a)}
+                          className="inline-flex items-center gap-2 rounded-xl border border-indigo-600/30 bg-indigo-600/5 px-4 py-2 text-[10px] font-black uppercase tracking-[0.10em] text-indigo-600 hover:bg-indigo-600 hover:text-white active:scale-95 transition-all shadow-sm"
                         >
-                          <ExternalLink /> Resume
-                        </a>
-                      ) : (
-                        <span className="text-[10px] font-black uppercase tracking-widest opacity-20 italic">No Link</span>
-                      )}
+                          <Eye size={12} /> Profile
+                        </button>
+                      </div>
                     </td>
                     <td className="px-8 py-6 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <span className={`inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${statusClasses(a?.status)}`}>
-                          {a?.status || 'Applied'}
+                          {a?.status || 'Pending'}
                         </span>
                       </div>
                       <div className="mt-2 flex items-center justify-end gap-1">
@@ -279,6 +305,23 @@ export default function CompanyApplicants() {
             </button>
           </div>
         </div>
+      )}
+
+      {schedulingApplicant && (
+        <ScheduleInterviewModal
+          applicant={schedulingApplicant}
+          onClose={() => setSchedulingApplicant(null)}
+          onSubmit={onScheduleSubmit}
+          isSubmitting={updatingId === (schedulingApplicant?._id || schedulingApplicant?.id)}
+        />
+      )}
+
+      {viewingApplicant && (
+        <ApplicantDetailModal
+          applicant={viewingApplicant}
+          isDark={isDark}
+          onClose={() => setViewingApplicant(null)}
+        />
       )}
     </div>
   )

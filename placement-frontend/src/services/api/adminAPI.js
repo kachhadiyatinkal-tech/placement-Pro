@@ -17,4 +17,5 @@ export const adminAPI = {
   setCompanyActive: (payload) => api.post('/api/v1/admin/company-set-active', payload),
   updateUser: (payload) => api.post('/api/v1/admin/user-update', payload),
   updateCompany: (payload) => api.post('/api/v1/admin/company-update', payload),
+  updateCompanyRegistrationStatus: (payload) => api.post('/api/v1/company/update-registration-status', payload),
 }

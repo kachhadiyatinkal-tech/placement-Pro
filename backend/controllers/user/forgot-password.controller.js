@@ -17,12 +17,12 @@ const ForgotPassword = async (req, res) => {
       account = await Company.findOne({ email: email.toLowerCase() });
     }
     
-    // Always return success message for security (don't reveal if email exists)
-    const successResponse = { message: "If an account exists, a reset link has been sent." };
 
     if (!account) {
-      return sendSuccess(res, 200, successResponse);
+      return sendError(res, 404, "Account not found", { email: "No account exists with this email address" });
     }
+
+    const successResponse = { message: "If an account exists, a reset link has been sent." };
 
     // Generate secure token using crypto.randomBytes(32)
     const resetToken = crypto.randomBytes(32).toString('hex');
@@ -46,7 +46,7 @@ const ForgotPassword = async (req, res) => {
     // Send email using the queue (with fallback)
     enqueueEmail({
       email: account.email,
-      subject: 'PlacementPro Elite - Password Reset Request',
+      subject: 'PLACEMENTPRO - Password Reset Request',
       template: 'forgotPassword',
       templateData: {
         resetUrl: resetUrl

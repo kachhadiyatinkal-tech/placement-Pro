@@ -65,7 +65,7 @@ export default function AdminApplications() {
         name: `${s?.first_name || ''} ${s?.last_name || ''}`.trim() || s?.name || s?.studentName || '—',
         email: s?.email || '—',
         position: a?.jobId ? `${jobTitle(a.jobId)} @ ${companyName(a.jobId)}` : (selectedJob ? jobTitle(selectedJob) : '—'),
-        status: a?.status || 'Applied',
+        status: a?.status || 'Pending',
         resume: resumeHref(a) || '—',
       }
     })
@@ -207,7 +207,7 @@ export default function AdminApplications() {
                     <td className="px-8 py-6">
                       <span className={`inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${isDark ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-indigo-50 border-indigo-100 text-indigo-600'
                         }`}>
-                        {a?.status || 'Applied'}
+                        {a?.status || 'Pending'}
                       </span>
                     </td>
                   </tr>
